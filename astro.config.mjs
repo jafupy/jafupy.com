@@ -15,20 +15,7 @@ export default defineConfig({
     },
   },
   site: "https://example.com",
-  integrations: [
-    mdx(),
-    sitemap(),
-    react(),
-    {
-      name: "Crawlspace",
-      hooks: {
-        "astro:config:setup": (options) => {
-          console.log("Crawlspace");
-          console.log(options);
-        },
-      },
-    },
-  ],
+  integrations: [mdx(), sitemap(), react()],
   adapter: vercel(),
 
   vite: {
