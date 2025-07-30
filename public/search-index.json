@@ -1,0 +1,35 @@
+{
+  "posts": [
+    {
+      "id": "ai-killed-innovation",
+      "title": "AI Killed Innovation.",
+      "description": "React and other major libraries can no longer make breaking API changes, as AI won't know, and instead they have to invent compilers.",
+      "date": "2025-05-29T00:00:00Z",
+      "tags": ["AI"],
+      "content": "Dolore sint quis anim Lorem sint fugiat. Ea Lorem elit consequat ex consectetur cupidatat ut nostrud duis enim excepteur enim. Nostrud duis amet amet id eu nostrud laborum ut pariatur minim. Et elit voluptate duis reprehenderit non dolor nisi. Voluptate occaecat aliqua ullamco quis sunt ad ad sit in laboris commodo esse duis. Minim commodo commodo est laborum pariatur consequat ipsum consectetur nisi laboris ipsum. Et duis fugiat amet magna ut non elit sunt incididunt id ipsum velit esse.\n\nEsse ",
+      "url": "/blog/ai-killed-innovation",
+      "searchContent": "ai killed innovation. react and other major libraries can no longer make breaking api changes, as ai won't know, and instead they have to invent compilers. dolore sint quis anim lorem sint fugiat. ea lorem elit consequat ex consectetur cupidatat ut nostrud duis enim excepteur enim. nostrud duis amet amet id eu nostrud laborum ut pariatur minim. et elit voluptate duis reprehenderit non dolor nisi. voluptate occaecat aliqua ullamco quis sunt ad ad sit in laboris commodo esse duis. minim commodo commodo est laborum pariatur consequat ipsum consectetur nisi laboris ipsum. et duis fugiat amet magna ut non elit sunt incididunt id ipsum velit esse.\n\nesse  ai"
+    },
+    {
+      "id": "ai-made-me-forget-how-to-code",
+      "title": "AI made me forget how to code",
+      "description": "Hi hi",
+      "date": "2025-05-29T00:00:00Z",
+      "tags": [],
+      "content": "Hi hi",
+      "url": "/blog/ai-made-me-forget-how-to-code",
+      "searchContent": "ai made me forget how to code hi hi hi hi"
+    },
+    {
+      "id": "my-frustrations-with-cms",
+      "title": "My Frustrations with Content Management Software",
+      "description": "Why I don't like CMSes",
+      "date": "2025-05-29T00:00:00Z",
+      "tags": [],
+      "content": "",
+      "url": "/blog/my-frustrations-with-content-management-software",
+      "searchContent": "my frustrations with content management software why i don't like cmses "
+    }
+  ],
+  "timestamp": 1749277440
+}
