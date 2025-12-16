@@ -1,82 +1,82 @@
 ---
-import { getCollection } from "astro:content";
 import Root from "../layouts/default.astro";
-import { Calendar } from "lucide-react";
+import { getCollection } from "astro:content";
 
 const posts = (await getCollection("blog"))
-
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
   .slice(0, 3);
 ---
 
-<Root>
-  <section class="min-h-[70vh] flex flex-col items-center justify-center">
-    <!-- <h1 class="text-[12rem] font-semibold not-prose mx-auto text-center my-0">
-      Jafu.py
-    </h1> -->
-    <svg
-      id="Jafupy"
-      aria-role="h1"
-      aria-text="Jafu.py"
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      class="w-full"
-      viewBox="0 0 40 12"
-      ><path
-        fill="currentColor"
-        d="M.276 9.096.144 7.692l.252.024q.132.012.204.012.552 0 .84-.168.3-.168.408-.504.108-.348.108-.888V1.08H3.48v5.088q0 .936-.264 1.596t-.84 1.02Q1.8 9.132.84 9.132q-.096 0-.228-.012t-.336-.024m6.329.06q-.516 0-.924-.192a1.56 1.56 0 0 1-.648-.6q-.228-.396-.228-.984 0-.492.18-.84.192-.348.564-.564a3.4 3.4 0 0 1 .924-.372q.552-.156 1.296-.264.408-.06.66-.12.264-.06.384-.18.12-.132.12-.384a.87.87 0 0 0-.264-.636q-.252-.276-.828-.276-.348 0-.672.12-.312.12-.54.384-.228.252-.312.672L4.96 4.5a2.6 2.6 0 0 1 .384-.828 2.4 2.4 0 0 1 .624-.612 2.7 2.7 0 0 1 .852-.372q.48-.12 1.056-.12.876 0 1.44.288.564.276.84.876.276.588.276 1.524v1.176q0 .408.012.852l.048.876q.036.432.084.84H9.22q-.048-.336-.084-.72a24 24 0 0 1-.06-.78h-.192a3 3 0 0 1-.48.84 2.4 2.4 0 0 1-.768.6q-.444.216-1.032.216m.6-1.116q.24 0 .48-.084.252-.084.492-.252t.444-.408q.204-.252.348-.588L8.945 5.64l.288.048q-.204.168-.504.264t-.636.144q-.324.048-.66.12a3 3 0 0 0-.588.168.94.94 0 0 0-.42.288q-.156.18-.156.504 0 .408.264.636t.672.228m5.33.96V4.848h-1.044v-1.14l1.644.084v-.216a1.8 1.8 0 0 1-.624-.312 1.34 1.34 0 0 1-.372-.504 1.8 1.8 0 0 1-.108-.624q0-.516.252-.888t.708-.576q.456-.216 1.08-.216.516 0 .936.132.432.132.696.324l-.12 1.392a2 2 0 0 0-.612-.336 1.9 1.9 0 0 0-.672-.132.88.88 0 0 0-.612.216q-.24.204-.24.672 0 .3.108.492.108.18.276.288.18.096.348.144h1.464v1.2h-1.632V9zm6.26.156q-1.08 0-1.632-.732-.54-.744-.54-2.244V2.724h1.524v3.288q0 .948.288 1.416t.888.468q.348 0 .612-.168.264-.18.456-.492.192-.324.3-.744.12-.42.144-.924V2.724h1.512V9H21.1l.024-1.98h-.216q-.156.756-.444 1.224a1.85 1.85 0 0 1-.684.696q-.408.216-.984.216m5.68-.012q-.492 0-.744-.216t-.252-.672q0-.468.252-.684t.744-.216q.516 0 .768.216.264.216.264.684 0 .888-1.032.888m2.193 1.848V2.724h1.272l-.012 1.704.204.012q.12-.6.384-1.02.276-.42.696-.636t.996-.216q.84 0 1.428.42.588.408.888 1.164.312.744.312 1.74 0 .936-.288 1.68a2.53 2.53 0 0 1-.852 1.164q-.564.42-1.404.42-.612 0-1.032-.24t-.684-.66a4 4 0 0 1-.432-.972h-.216q.072.324.12.672a10 10 0 0 1 .096.672q.036.324.036.624v1.74zM29.8 7.92q.468 0 .792-.252a1.63 1.63 0 0 0 .492-.72 3.2 3.2 0 0 0 .168-1.068q0-.624-.18-1.08a1.5 1.5 0 0 0-.504-.708 1.3 1.3 0 0 0-.792-.252q-.396 0-.696.18t-.504.48q-.204.288-.3.624a2.4 2.4 0 0 0-.096.66v.204q0 .24.06.504a3 3 0 0 0 .204.516q.132.252.324.468.192.204.456.324t.576.12m6.685 3.228q-.48 0-.972-.096a4 4 0 0 1-.924-.3 2.2 2.2 0 0 1-.708-.504L34.397 9q.348.396.9.6t1.116.204q.66 0 1.092-.276.432-.264.66-.828t.252-1.404l.084-1.14h-.252q-.12.816-.396 1.332-.276.504-.696.744a1.94 1.94 0 0 1-.96.228q-.684 0-1.152-.348t-.708-1.032q-.228-.684-.228-1.692V2.724h1.524V5.04q0 1.128.276 1.644.276.504.84.504.3 0 .552-.156a1.3 1.3 0 0 0 .42-.468q.18-.312.276-.768.108-.456.12-1.044V2.724h1.524v4.632q0 .756-.132 1.368-.12.6-.372 1.044-.252.456-.636.768-.372.312-.876.456a3.9 3.9 0 0 1-1.14.156"
-      ></path></svg
-    >
-    <p class="max-w-ch-sm mt-0 mx-auto text-justify">
-      Hey! I'm Jacob, a {new Date().getFullYear() - 2010}yr old GCSE student in
-      England studying Computer Science. I learnt python about 5 years ago,
-      before learning svelte and react.
-    </p>
-  </section>
-  <section
-    class="sm:grid grid-cols-2 md:grid-cols-3 gap-4 w-full max-w-ch-lg mx-auto"
+<Root class="py-0!" title="Jafu.py" description="I'm a nerd sometimes">
+  <main
+    class="pt-[calc((50vh-var(--height))*(2/3))]! flex flex-col items-center justify-center max-w-7xl mx-auto prose prose-grey dark:prose-invert"
   >
-    <h3 class="col-span-3 text-sm font-mono text-center">WRITING</h3>
-    {
-      posts.map(({ data: p, body, ...stuff }) => (
-        <article class="break-inside-avoid border border-grey-100/10 hover:border-grey-100/20 transition-all backdrop-blur-md bg-grey-950/20 p-4 rounded-lg w-full max-w-xs not-prose m-4 first:mt-0">
-          <a
-            class="h-full w-full"
-            href={`w/${new Date(p.date).getFullYear()}/${stuff.id}`}
-          >
-            <h3 class="text-grey-50 font-semibold text-2xl mb-2grid grid-template-rows-subgrid row-span-1">
-              {p.title}
-            </h3>
-
-            <ul class="flex flex-wrap text-sm gap-2 my-4">
-              <li class="rounded-full px-2 py-0.5 bg-grey-900 flex-nowrap text-nowrap flex items-center justify-center gap-2">
-                <Calendar className="size-4 text-old-rose" />
-                <date>
-                  {new Date(p.date).toLocaleDateString(undefined, {
-                    month: "short",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
-                </date>
-              </li>
-              {p.tags &&
-                p.tags.map((tag) => (
-                  <li class="inline-flex capitalize items-center justify-center rounded-full px-2 py-0.5 bg-grey-900 flex-nowrap text-nowrap">
-                    <span class="font-light font-mono text-old-rose">#</span>{" "}
-                    {tag}
-                  </li>
-                ))}
-            </ul>
-
-            <p class="text-sm">{p.description}</p>
-          </a>
-        </article>
-      ))
-    }
-    <a
-      class="col-span-3 text-center mx-auto block not-prose hover:text-old-rose"
-      href="w">See all</a
+    <h1 class="w-[89%]" aria-label="Jafu.py">
+      <svg
+        id="Jafupy"
+        aria-describedby="Jafu.py"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        class="w-full min-h-8"
+        viewBox="0 0 40 12"
+        ><path
+          fill="currentColor"
+          d="M.276 9.096.144 7.692l.252.024q.132.012.204.012.552 0 .84-.168.3-.168.408-.504.108-.348.108-.888V1.08H3.48v5.088q0 .936-.264 1.596t-.84 1.02Q1.8 9.132.84 9.132q-.096 0-.228-.012t-.336-.024m6.329.06q-.516 0-.924-.192a1.56 1.56 0 0 1-.648-.6q-.228-.396-.228-.984 0-.492.18-.84.192-.348.564-.564a3.4 3.4 0 0 1 .924-.372q.552-.156 1.296-.264.408-.06.66-.12.264-.06.384-.18.12-.132.12-.384a.87.87 0 0 0-.264-.636q-.252-.276-.828-.276-.348 0-.672.12-.312.12-.54.384-.228.252-.312.672L4.96 4.5a2.6 2.6 0 0 1 .384-.828 2.4 2.4 0 0 1 .624-.612 2.7 2.7 0 0 1 .852-.372q.48-.12 1.056-.12.876 0 1.44.288.564.276.84.876.276.588.276 1.524v1.176q0 .408.012.852l.048.876q.036.432.084.84H9.22q-.048-.336-.084-.72a24 24 0 0 1-.06-.78h-.192a3 3 0 0 1-.48.84 2.4 2.4 0 0 1-.768.6q-.444.216-1.032.216m.6-1.116q.24 0 .48-.084.252-.084.492-.252t.444-.408q.204-.252.348-.588L8.945 5.64l.288.048q-.204.168-.504.264t-.636.144q-.324.048-.66.12a3 3 0 0 0-.588.168.94.94 0 0 0-.42.288q-.156.18-.156.504 0 .408.264.636t.672.228m5.33.96V4.848h-1.044v-1.14l1.644.084v-.216a1.8 1.8 0 0 1-.624-.312 1.34 1.34 0 0 1-.372-.504 1.8 1.8 0 0 1-.108-.624q0-.516.252-.888t.708-.576q.456-.216 1.08-.216.516 0 .936.132.432.132.696.324l-.12 1.392a2 2 0 0 0-.612-.336 1.9 1.9 0 0 0-.672-.132.88.88 0 0 0-.612.216q-.24.204-.24.672 0 .3.108.492.108.18.276.288.18.096.348.144h1.464v1.2h-1.632V9zm6.26.156q-1.08 0-1.632-.732-.54-.744-.54-2.244V2.724h1.524v3.288q0 .948.288 1.416t.888.468q.348 0 .612-.168.264-.18.456-.492.192-.324.3-.744.12-.42.144-.924V2.724h1.512V9H21.1l.024-1.98h-.216q-.156.756-.444 1.224a1.85 1.85 0 0 1-.684.696q-.408.216-.984.216m5.68-.012q-.492 0-.744-.216t-.252-.672q0-.468.252-.684t.744-.216q.516 0 .768.216.264.216.264.684 0 .888-1.032.888m2.193 1.848V2.724h1.272l-.012 1.704.204.012q.12-.6.384-1.02.276-.42.696-.636t.996-.216q.84 0 1.428.42.588.408.888 1.164.312.744.312 1.74 0 .936-.288 1.68a2.53 2.53 0 0 1-.852 1.164q-.564.42-1.404.42-.612 0-1.032-.24t-.684-.66a4 4 0 0 1-.432-.972h-.216q.072.324.12.672a10 10 0 0 1 .096.672q.036.324.036.624v1.74zM29.8 7.92q.468 0 .792-.252a1.63 1.63 0 0 0 .492-.72 3.2 3.2 0 0 0 .168-1.068q0-.624-.18-1.08a1.5 1.5 0 0 0-.504-.708 1.3 1.3 0 0 0-.792-.252q-.396 0-.696.18t-.504.48q-.204.288-.3.624a2.4 2.4 0 0 0-.096.66v.204q0 .24.06.504a3 3 0 0 0 .204.516q.132.252.324.468.192.204.456.324t.576.12m6.685 3.228q-.48 0-.972-.096a4 4 0 0 1-.924-.3 2.2 2.2 0 0 1-.708-.504L34.397 9q.348.396.9.6t1.116.204q.66 0 1.092-.276.432-.264.66-.828t.252-1.404l.084-1.14h-.252q-.12.816-.396 1.332-.276.504-.696.744a1.94 1.94 0 0 1-.96.228q-.684 0-1.152-.348t-.708-1.032q-.228-.684-.228-1.692V2.724h1.524V5.04q0 1.128.276 1.644.276.504.84.504.3 0 .552-.156a1.3 1.3 0 0 0 .42-.468q.18-.312.276-.768.108-.456.12-1.044V2.724h1.524v4.632q0 .756-.132 1.368-.12.6-.372 1.044-.252.456-.636.768-.372.312-.876.456a3.9 3.9 0 0 1-1.14.156"
+        ></path></svg
+      >
+    </h1>
+    <p id="text" class="max-w-ch-sm mt-0 mb-0">
+      Hey! I'm <strong class="not-prose text-old-rose font-normal">Jacob</strong
+      >, a <strong class="not-prose text-old-rose font-normal"
+        >{new Date().getFullYear() - 2010} year old</strong
+      > GCSE student in <strong class="not-prose text-old-rose font-normal"
+        >England</strong
+      > studying <strong class="not-prose text-old-rose font-normal"
+        >Computer Science</strong
+      >. I learnt python about 5 years ago, before learning <strong
+        class="not-prose text-old-rose font-normal">svelte</strong
+      > and <strong class="not-prose text-old-rose font-normal">react</strong>.
+    </p>
+    <ol
+      id="blog-cards"
+      class="grid md:grid-cols-3 list-none gap-4 max-w-ch-xl my-0"
     >
-  </section>
-  <section></section>
+      {
+        posts.map((post) => {
+          return (
+            <li class="grid grid-rows-subgrid row-span-2 w-full p-4 border border-grey-900/20 dark:border-grey-100/20 bg-grey-50/20 dark:bg-grey-950/20 backdrop-blur-md rounded-xl">
+              <a
+                href={`/writing/${post.data.date.getFullYear()}/${post.id}`}
+                class="grid grid-rows-subgrid row-span-2 gap-0.5 w-full no-underline m-0 p-0"
+              >
+                <h3 class="m-0!">{post.data.title}</h3>
+                <div class="p-0 m-0">
+                  <time
+                    datetime={post.data.date.toDateString()}
+                    class="text-grey-500 dark:text-300 text-sm mb-0"
+                  >
+                    {post.data.date.toLocaleDateString()}
+                  </time>
+                  <p class="mb-0 text-sm mt-0 text-grey-800 dark:text-grey-200 text-justify hyphens-auto">
+                    {post.data.description}
+                  </p>
+                </div>
+              </a>
+            </li>
+          );
+        })
+      }
+    </ol>
+  </main>
 </Root>
+
+<script is:inline>
+  const observer = new ResizeObserver(() => {
+    const svg = document.querySelector("#Jafupy");
+    const height = svg?.clientHeight ?? 0;
+    document
+      .querySelector("main")
+      ?.style.setProperty("--height", `${height / 2}px`);
+  });
+  observer.observe(document.body);
+</script>
