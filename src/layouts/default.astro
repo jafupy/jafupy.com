@@ -1,116 +1,131 @@
 ---
-import Barebones from "./barebones.astro";
-import Wiggle from "$/components/wiggle.astro";
-import { Heart, Newspaper, UserRound } from "lucide-react";
-import { logo } from "$/lib.ts";
-import CommandMenu from "$/components/cmdk";
-import SearchButton from "$/components/search";
+import Base from "./minimal.astro";
+import Logo from "../assets/logo.svg";
+
+import Cmdk from "../cmdk/cmdk.svelte";
+import OpenCMDK from "../cmdk/openButton.svelte";
+
+import { ExternalLink } from "lucide-svelte";
+
+const { class: className, title, description } = Astro.props;
 ---
 
-<Barebones>
-  <CommandMenu client:load />
-  <header class="fixed top-5 inset-x-5 not-prose flex flex-row z-90">
-    <!-- <span
-      class="flex w-fit gap-4 p-2 px-4 rounded-xl border border-old-rose/50 backdrop-px text-sm items-center justify-center"
-      >New! Something something</span
-    > -->
+<Base class={className} title={title} description={description}>
+  <header class="fixed top-6 left-1/2 -translate-x-1/2 z-50000 flex">
     <nav
-      class="flex w-fit ml-auto gap-4 pr-4 pl-2 py-2 rounded-xl border border-old-rose/50 backdrop-blur-md bg-grey-950/20 hover:bg-grey-950/30 text-sm items-center justify-center"
+      class="flex w-fit ml-auto gap-4 pr-4 pl-2 py-2 rounded-xl border border-grey-500 dark:border-grey-100/20 backdrop-blur-md bg-grey-50/20 hover:bg-grey-50/30 dark:bg-grey-950/20 dark:hover:bg-grey-950/30 text-sm items-center justify-center"
     >
       <a
         href="/"
-        class="hover:text-old-rose transition-all inline-flex gap-2 items-center justify-center"
+        class="group flex items-center justify-center gap-1.5 hover:text-old-rose transition-colors"
       >
-        <img src={logo} class="size-6 rounded-sm" />
+        <Logo
+          class="size-6 rounded-sm group-hover:scale-110 transition-transform group-active:scale-90"
+        />
+        Jafu.py
+        <span class="sr-only">Home</span>
       </a>
-
-      <a
-        href="/w"
-        class="hover:text-old-rose transition-all items-center justify center inline-felx"
-      >
-        <Newspaper
-          className="size-4 inline mr-1 stroke-1.5 text-old-rose"
-        />Writing</a
+      <a href="/about" class="hover:text-old-rose transition-colors">About</a>
+      <a href="/writing" class="hover:text-old-rose transition-colors"
+        >Writing</a
       >
       <a
-        href="/about"
-        class="hover:text-old-rose transition-all inline-flex justify-center items-center"
-      >
-        <UserRound className="size-4 inline mr-1 stroke-1.5 text-old-rose" /> About
+        href="mailto:jacob@jafupy.com"
+        class="group relative hover:text-old-rose transition-colors flex items-center justify-center gap-2"
+        >Contact
+        <ExternalLink class="size-3.75" />
+        <span
+          id="contact_tooltip"
+          class="invisible select-text pointer-events-auto not-group-hover:delay-200 overflow-visible group-hover:visible absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-grey-900 text-grey-100 text-sm px-4 py-1.5 rounded-lg border border-grey-300/20 whitespace-nowrap before:content-[''] before:absolute before:bottom-full before:translate-y-1/2 before:-z-2 before:left-1/2 before:-translate-x-1/2 before:border-l before:border-t before:border-grey-300/20 before:bg-grey-900 before:rounded-tl-xs before:size-2 before:rotate-45"
+        >
+          hello@jafupy.com
+        </span>
       </a>
+      <span class="block w-px h-4 bg-grey-300 mx-2"></span>
+      <OpenCMDK client:load />
     </nav>
-    <SearchButton client:load />
   </header>
-</Barebones>
-
-<main
-  class="prose-grey justify-center prose prose-invert mx-auto flex min-h-screen w-full max-w-5xl flex-col items-center px-0 pb-12 pt-24"
->
   <slot />
-</main>
+  <Cmdk client:load="svelte" />
+</Base>
 
-<footer
-  class="not-prose flex w-full flex-col gap-4 px-5 py-12 text-sm text-grey-400"
->
-  <Wiggle class="text-grey-800" />
-  <ul
-    class="flex flex-col-reverse items-baseline justify-center gap-4 sm:flex-row"
-  >
-    <li class="mr-auto">
-      Made with <Heart
-        aria-label="Love"
-        className="inline h-4 w-4 text-old-rose stroke-[2.5px]"
-      /> by Jacob
-    </li>
-    <!-- <li class="flex items-center gap-2">
-      <a href="/donate" class="underline underline-offset-4 hover:text-old-rose"
-        >Donate</a
-      >
-    </li> -->
-    <li class="flex items-center gap-2">Socials</li>
-  </ul>
-  <div class="flex items-center">
-    <ul class="order-2 flex flex-row items-center justify-center gap-4">
-      <li>
-        <a
-          href="https://bsky.app/profile/jafupy.com"
-          class="transition-colors hover:text-grey-200"
-        >
-          <span class="sr-only">Bluesky</span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="w-5 h-5 hover:text-[#1185fe] transition-colors"
-            viewBox="0 0 530 600"
-            ><path
-              fill="currentColor"
-              d="M135.72 44.03C202.216 93.951 273.74 195.17 300 249.49c26.262-54.316 97.782-155.54 164.28-205.46C512.26 8.009 590-19.862 590 68.825c0 17.712-10.155 148.79-16.111 170.07-20.703 73.984-96.144 92.854-163.25 81.433 117.3 19.964 147.14 86.092 82.697 152.22-122.39 125.59-175.91-31.511-189.63-71.766-2.514-7.38-3.69-10.832-3.708-7.896-.017-2.936-1.193.516-3.707 7.896-13.714 40.255-67.233 197.36-189.63 71.766-64.444-66.128-34.605-132.26 82.697-152.22-67.108 11.421-142.55-7.45-163.25-81.433C20.15 217.613 9.997 86.535 9.997 68.825c0-88.687 77.742-60.816 125.72-24.795z"
-            ></path></svg
-          >
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://github.com/jafupy"
-          class="transition-colors hover:text-grey-200"
-        >
-          <span class="sr-only">GitHub</span>
-          <svg
-            fill="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-            class="h-5 w-5"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"
-              clip-rule="evenodd"></path>
-          </svg>
-        </a>
-      </li>
-    </ul>
-    <p class="mr-auto text-sm">
-      © {new Date().getFullYear()} Jacob / @jafu.py. <br />
-      All Rights Reserved
-    </p>
-  </div>
-</footer>
+<script is:inline>
+  document.querySelector("#contact_tooltip").addEventListener("click", (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+  });
+</script>
+
+<script>
+  // Alternative version with even better performance using transform instead of CSS custom properties
+  function grid({ strength = 20, easing = 0.05, element = document.body }) {
+    let target = { x: 0, y: 0 };
+    let current = { x: 0, y: 0 };
+    let rafID = -Infinity;
+    let isAnimating = false;
+
+    const threshold = 0.001;
+    const invStrength = -strength;
+
+    function handleMouseMove(e: MouseEvent) {
+      const { innerWidth, innerHeight } = window;
+      target.x = (e.clientX / innerWidth - 0.5) * invStrength;
+      target.y = (e.clientY / innerHeight - 0.5) * invStrength;
+
+      if (!isAnimating) {
+        isAnimating = true;
+        rafID = requestAnimationFrame(update);
+      }
+    }
+
+    function update() {
+      const deltaX = target.x - current.x;
+      const deltaY = target.y - current.y;
+
+      if (Math.abs(deltaX) > threshold || Math.abs(deltaY) > threshold) {
+        current.x += deltaX * easing;
+        current.y += deltaY * easing;
+
+        // Using transform is more performant than CSS custom properties
+        element.style.setProperty(
+          "--grid-offset-x",
+          `${current.x.toFixed(2)}px`,
+        );
+        element.style.setProperty(
+          "--grid-offset-y",
+          `${current.y.toFixed(2)}px`,
+        );
+
+        rafID = requestAnimationFrame(update);
+      } else {
+        isAnimating = false;
+        current.x = target.x;
+        current.y = target.y;
+
+        element.style.setProperty(
+          "--grid-offset-x",
+          `${target.x.toFixed(2)}px`,
+        );
+        element.style.setProperty(
+          "--grid-offset-y",
+          `${target.y.toFixed(2)}px`,
+        );
+      }
+    }
+
+    function cleanup() {
+      window.removeEventListener("mousemove", handleMouseMove);
+      if (rafID !== -Infinity) {
+        cancelAnimationFrame(rafID);
+      }
+      isAnimating = false;
+      element.style.transform = "";
+    }
+
+    window.addEventListener("mousemove", handleMouseMove, { passive: true });
+
+    return cleanup;
+  }
+
+  grid({});
+</script>
