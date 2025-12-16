@@ -1,7 +1,6 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 
-
 import vercel from "@astrojs/vercel";
 import tailwindcss from "@tailwindcss/vite";
 import svelte from "@astrojs/svelte";
@@ -13,12 +12,10 @@ export default defineConfig({
       theme: "poimandres",
     },
   },
-  site: "https://example.com",
-  integrations: [mdx()],
   adapter: vercel(),
 
   vite: {
-    // plugins: [tailwindcss()],
+    plugins: [tailwindcss()],
     resolve: {
       alias: {
         $: "src/",
