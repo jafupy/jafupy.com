@@ -1,11 +1,10 @@
 // @ts-check
 import { defineConfig } from "astro/config";
-import mdx from "@astrojs/mdx";
-import sitemap from "@astrojs/sitemap";
 
-import react from "@astrojs/react";
+
 import vercel from "@astrojs/vercel";
 import tailwindcss from "@tailwindcss/vite";
+import svelte from "@astrojs/svelte";
 
 // https://astro.build/config
 export default defineConfig({
@@ -15,15 +14,17 @@ export default defineConfig({
     },
   },
   site: "https://example.com",
-  integrations: [mdx(), sitemap(), react()],
+  integrations: [mdx()],
   adapter: vercel(),
 
   vite: {
-    plugins: [tailwindcss()],
+    // plugins: [tailwindcss()],
     resolve: {
       alias: {
         $: "src/",
       },
     },
   },
+
+  integrations: [svelte()],
 });
