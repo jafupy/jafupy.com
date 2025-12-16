@@ -1,0 +1,23 @@
+---
+const { title = "No title", description } = Astro.props;
+const ogImage = "http://localhost:4321/ogp.png";
+---
+
+<!-- Open Graph -->
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:url" content={Astro.url.href} />
+<meta property="og:type" content="website" />
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
+<meta name="twitter:site" content="@jafupy" />
+<meta name="twitter:creator" content="@jafupy" />
+
+<meta name="theme-color" content="#cb8b8c" />
+
+<title>{title}</title>
