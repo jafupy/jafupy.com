@@ -1,4 +1,4 @@
-import { writing, pages } from "../lib/search";
+import { writing, pages } from "$/lib/search";
 import { defineAction } from "astro:actions";
 import { z } from "astro:schema";
 
