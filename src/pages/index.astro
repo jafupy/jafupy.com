@@ -71,12 +71,9 @@ const posts = (await getCollection("blog"))
 </Root>
 
 <script is:inline>
-  const observer = new ResizeObserver(() => {
-    const svg = document.querySelector("#Jafupy");
-    const height = svg?.clientHeight ?? 0;
-    document
-      .querySelector("main")
-      ?.style.setProperty("--height", `${height / 2}px`);
-  });
-  observer.observe(document.body);
+  import { forceCenter } from "$/lib/force-center";
+
+  const unforce = forceCenter("#title");
+
+  window.addEventListener("beforeunload", unforce);
 </script>

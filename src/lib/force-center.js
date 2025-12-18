@@ -1,21 +1,15 @@
-export function forceCenter({ centered, below, factor }) {
-  const watched = document.querySelector(below);
-  const wordmark = document.querySelector(centered);
+/**
+ * Force an item to the center of the viewport, regardless of content below
+ * @param {string|HTMLElement} element
+ */
+export function forceCenter(element) {
+  const el =
+    typeof element === "string" ? document.querySelector(element) : element;
+  const observer = new ResizeObserver(() => {
+    const height = el?.clientHeight ?? 0;
+    el.style.marginTop = `${(window.innerHeight - height) / 2}px`;
+  });
+  observer.observe(document.body);
 
-  function onResize() {
-    const wordmarkHeight = wordmark?.getBoundingClientRect().height ?? 0;
-
-    // Center wordmark in viewport, ignoring content
-    const margin = (viewportHeight - wordmarkHeight) / 2;
-
-    wordmark && wordmark.setAttribute("style", `margin-top: ${margin}px;`);
-  }
-
-  const observer = new ResizeObserver(onResize);
-  watched && observer.observe(watched);
-  onResize();
-
-  return () => {
-    observer.disconnect();
-  };
+  return observer.disconnect;
 }
