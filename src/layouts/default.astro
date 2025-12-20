@@ -11,9 +11,11 @@ const { class: className, title, description } = Astro.props;
 ---
 
 <Base class={className} title={title} description={description}>
-  <header class="fixed top-6 left-1/2 -translate-x-1/2 z-50000 flex">
+  <header
+    class="fixed top-6 md:left-1/2 md:-translate-x-1/2 not-md:right-6 z-50000 flex"
+  >
     <nav
-      class="flex w-fit ml-auto gap-4 pr-4 pl-2 py-2 rounded-xl border border-grey-500 dark:border-grey-100/20 backdrop-blur-md bg-grey-50/20 hover:bg-grey-50/30 dark:bg-grey-950/20 dark:hover:bg-grey-950/30 text-sm items-center justify-center"
+      class="flex w-fit gap-4 pr-4 pl-2 py-2 rounded-xl border border-grey-300 dark:border-grey-100/20 backdrop-blur-md bg-grey-50/80 hover:bg-grey-50/90 transition-colors dark:bg-grey-950/20 dark:hover:bg-grey-950/30 text-sm items-center justify-center"
     >
       <a
         href="/"
@@ -50,10 +52,10 @@ const { class: className, title, description } = Astro.props;
 </Base>
 
 <script is:inline>
-  document.querySelector("#contact_tooltip").addEventListener("click", (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-  });
+  // document.querySelector("#contact_tooltip").addEventListener("click", (e) => {
+  //   e.stopPropagation();
+  //   e.preventDefault();
+  // });
 </script>
 
 <script>

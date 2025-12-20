@@ -39,7 +39,7 @@ const posts = (await getCollection("blog"))
     </p>
     <ol
       id="blog-cards"
-      class="grid md:grid-cols-3 list-none gap-4 max-w-ch-xl my-0"
+      class="flex flex-col md:grid md:grid-cols-3 list-none gap-4 max-w-ch-xl my-0"
     >
       {
         posts.map((post) => {
@@ -68,12 +68,11 @@ const posts = (await getCollection("blog"))
       }
     </ol>
   </main>
+  <script>
+    import { forceCenter } from "$/lib/force-center";
+
+    const unforce = forceCenter("#Jafupy");
+
+    window.addEventListener("beforeunload", unforce);
+  </script>
 </Root>
-
-<script is:inline>
-  import { forceCenter } from "$/lib/force-center";
-
-  const unforce = forceCenter("#title");
-
-  window.addEventListener("beforeunload", unforce);
-</script>

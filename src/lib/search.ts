@@ -9,7 +9,12 @@ export const collection = (await getCollection("blog")).map((e) => ({
 }));
 
 export const writing = new Fuse(collection, {
-  keys: [{ name: "title", weight: 2 }, "tags", "description", "body"],
+  keys: [
+    { name: "title", weight: 2 },
+    "tags",
+    "description",
+    { name: "body", weight: 0.5 },
+  ],
   threshold: 0.5,
   includeScore: true,
 });
