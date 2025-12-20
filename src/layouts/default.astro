@@ -4,6 +4,7 @@ import Logo from "$/assets/logo.svg";
 
 import Cmdk from "$/cmdk/cmdk.svelte";
 import OpenCMDK from "$/cmdk/openButton.svelte";
+import MobileNav from "$/lib/mobile_nav.svelte";
 
 import { ExternalLink } from "lucide-svelte";
 
@@ -45,6 +46,8 @@ const { class: className, title, description } = Astro.props;
       </a>
       <span class="block w-px h-4 bg-grey-300 mx-2"></span>
       <OpenCMDK client:load />
+
+      <MobileNav client:media="(max-width: 40rem)" client:only="svelte" />
     </nav>
   </header>
   <slot />

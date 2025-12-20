@@ -22,6 +22,7 @@
     "svelte": "^5.43.6",
     "tailwindcss": "^4.1.17",
     "tailwindcss-animate": "^1.0.7",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vaul-svelte": "^0.3.2"
   }
 }
