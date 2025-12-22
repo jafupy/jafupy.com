@@ -10,7 +10,8 @@ const { class: className, title, description } = Astro.props;
     <script is:inline>
       if (
         localStorage.getItem("theme").toString() == "dark" ||
-        window.matchMedia("(prefers-color-scheme: dark)").matches
+        (localStorage.getItem("theme").toString() == "auto" &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches)
       ) {
         document.documentElement.classList.add("dark");
       }
