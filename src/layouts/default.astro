@@ -28,13 +28,18 @@ const { class: className, title, description } = Astro.props;
         Jafu.py
         <span class="sr-only">Home</span>
       </a>
-      <a href="/about" class="hover:text-old-rose transition-colors">About</a>
-      <a href="/writing" class="hover:text-old-rose transition-colors"
+      <a
+        href="/about"
+        class="hidden sm:inline hover:text-old-rose transition-colors">About</a
+      >
+      <a
+        href="/writing"
+        class="hidden sm:inline hover:text-old-rose transition-colors"
         >Writing</a
       >
       <a
         href="mailto:jacob@jafupy.com"
-        class="group relative hover:text-old-rose transition-colors flex items-center justify-center gap-2"
+        class="hidden group relative hover:text-old-rose transition-colors sm:flex items-center justify-center gap-2"
         >Contact
         <ExternalLink class="size-3.75" />
         <span
@@ -44,8 +49,8 @@ const { class: className, title, description } = Astro.props;
           hello@jafupy.com
         </span>
       </a>
-      <span class="block w-px h-4 bg-grey-300 mx-2"></span>
-      <OpenCMDK client:load />
+      <span class="hidden sm:block w-px h-4 bg-grey-300 mx-2"></span>
+      <OpenCMDK client:only="svelte" />
 
       <MobileNav client:media="(max-width: 40rem)" client:only="svelte" />
     </nav>
