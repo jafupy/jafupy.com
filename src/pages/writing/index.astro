@@ -1,0 +1,45 @@
+---
+import Root from "$/layouts/default.astro";
+
+import { getCollection } from "astro:content";
+
+const posts = (await getCollection("blog")).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+---
+
+<Root>
+  <main
+    class="prose prose-grey dark:prose-invert flex flex-col items-center justify-center min-h-screen w-full! max-w-7xl gap-4 mx-auto"
+  >
+    <h1 class="text-7xl">My Writing</h1>
+
+    <ol class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 list-none">
+      {
+        posts.map((post) => {
+          return (
+            <li class="w-full p-4 border border-grey-900/20 dark:border-grey-100/20 bg-grey-50/20 dark:bg-grey-950/20 backdrop-blur-md rounded-xl">
+              <a
+                href={`/writing/${post.data.date.getFullYear()}/${post.id}`}
+                class="gap-0.5 w-full no-underline m-0 p-0"
+              >
+                <h3 class="m-0!">{post.data.title}</h3>
+                <div class="p-0 m-0">
+                  <time
+                    datetime={post.data.date.toDateString()}
+                    class="text-grey-500 dark:text-300 text-sm mb-0"
+                  >
+                    {post.data.date.toLocaleDateString()}
+                  </time>
+                  <p class="mb-0 text-sm mt-0 text-grey-800 dark:text-grey-200 text-justify hyphens-auto">
+                    {post.data.description}
+                  </p>
+                </div>
+              </a>
+            </li>
+          );
+        })
+      }
+    </ol>
+  </main>
+</Root>

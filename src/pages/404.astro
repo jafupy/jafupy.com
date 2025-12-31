@@ -1,18 +1,124 @@
 ---
-import Root from "$/layouts/default.astro";
-import Search from "$/components/search.tsx";
+import Layout from "$/layouts/default.astro";
 ---
 
-<Root>
-  <section class="max-w-ch-sm">
-    <h1 class="text-7xl justify-center items-center flex gap-2 mb-0">404</h1>
-    <span
-      class="font-normal flex items-center justify-center mt-0 text-center w-full text-4xl"
-      >Page not found</span
+<Layout class="py-0!" title="404" description="Page not found">
+  <main
+    class="prose prose-grey dark:prose-invert h-screen flex flex-col items-center justify-center mx-auto"
+  >
+    <h1
+      class="leading-none font-bold font-serif flex gap-0 mb-0 glitch"
+      style="font-size: min(40vw, 80vh)"
     >
-    <p>
-      The page you're looking for seems to have wandered off into the digital
-      void. Don't worry, it happens to the best of us!
+      <span aria-hidden="true" class="select-none">404</span>
+      404
+      <span aria-hidden="true" class="select-none">404</span>
+    </h1>
+
+    <p
+      class="border-grey-100/10 backdrop-blur-md hover:border-grey-100/20 border bg-black/20 p-4 block rounded-xl font-sans"
+    >
+      Where are we? I don't recognise this URL. Should we try <a href="/"
+        >going home</a
+      >?
     </p>
-  </section>
-</Root>
+  </main>
+</Layout>
+
+<style>
+  .glitch {
+    --speed: 1;
+
+    position: relative;
+
+    text-shadow:
+      0.05em 0 0 var(--color-red-500),
+      -0.025em -0.05em 0 var(--color-green-500),
+      0.025em 0.05em 0 var(--color-blue-500);
+
+    animation: glitch calc(var(--speed) * 500ms) infinite;
+  }
+
+  .glitch span {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  .glitch span:first-child {
+    animation: glitch calc(var(--speed) * 650ms) infinite;
+    clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+    transform: translate(-0.025em, -0.0125em);
+    /* color: green; */
+    opacity: 0.8;
+  }
+
+  .glitch span:last-child {
+    animation: glitch calc(var(--speed) * 375ms) infinite;
+    clip-path: polygon(0 80%, 100% 20%, 100% 100%, 0 100%);
+    transform: translate(0.0125em, 0.025em);
+    /* color: red; */
+    opacity: 0.8;
+  }
+
+  /* https://web.dev/prefers-reduced-motion/#(bonus)-forcing-reduced-motion-on-all-websites */
+
+  @keyframes glitch {
+    0% {
+      text-shadow:
+        0.05em 0 0 var(--color-red-500),
+        -0.05em -0.025em 0 var(--color-green-500),
+        -0.025em 0.05em 0 var(--color-blue-500);
+    }
+    14% {
+      text-shadow:
+        0.05em 0 0 var(--color-red-500),
+        -0.05em -0.025em 0 var(--color-green-500),
+        -0.025em 0.05em 0 var(--color-blue-500);
+    }
+    15% {
+      text-shadow:
+        -0.05em -0.025em 0 var(--color-red-500),
+        0.025em 0.025em 0 var(--color-green-500),
+        -0.05em -0.05em 0 var(--color-blue-500);
+    }
+    49% {
+      text-shadow:
+        -0.05em -0.025em 0 var(--color-red-500),
+        0.025em 0.025em 0 var(--color-green-500),
+        -0.05em -0.05em 0 var(--color-blue-500);
+    }
+    50% {
+      text-shadow:
+        0.025em 0.05em 0 var(--color-red-500),
+        0.05em 0 0 var(--color-green-500),
+        0 -0.05em 0 var(--color-blue-500);
+    }
+    99% {
+      text-shadow:
+        0.025em 0.05em 0 var(--color-red-500),
+        0.05em 0 0 var(--color-green-500),
+        0 -0.05em 0 var(--color-blue-500);
+    }
+    100% {
+      text-shadow:
+        -0.025em 0 0 var(--color-red-500),
+        -0.025em -0.025em 0 var(--color-green-500),
+        -0.025em -0.05em 0 var(--color-blue-500);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-delay: -1ms !important;
+      animation-duration: 1ms !important;
+      animation-iteration-count: 1 !important;
+      background-attachment: initial !important;
+      scroll-behavior: auto !important;
+      transition-duration: 0s !important;
+      transition-delay: 0s !important;
+    }
+  }
+</style>

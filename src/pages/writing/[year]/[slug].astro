@@ -1,0 +1,38 @@
+---
+import { getCollection, render } from "astro:content";
+import Root from "$/layouts/default.astro";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  return posts.map((post) => ({
+    params: { slug: post.id, year: new Date(post.data.date).getFullYear() },
+    props: post,
+  }));
+}
+
+const post = Astro.props;
+const { Content } = await render(post);
+---
+
+<Root title={post.data.title} description={post.data.description}>
+  <main
+    class="pt-[calc((50vh-var(--height)))]! flex flex-col items-center justify-center max-w-ch-md w-full mx-auto prose prose-grey dark:prose-invert"
+  >
+    <article class="w-full">
+      <h1 id="title" class="text-7xl flex items-center justify-center">
+        {post.data.title}
+      </h1>
+      <div id="prose" class="[&>p]:text-justify [&>p]:hyphens-auto">
+        <Content />
+      </div>
+    </article>
+  </main>
+</Root>
+
+<script is:inline>
+  import { forceCenter } from "$/lib/force-center";
+
+  const unforce = forceCenter("#title");
+
+  window.addEventListener("beforeunload", unforce);
+</script>

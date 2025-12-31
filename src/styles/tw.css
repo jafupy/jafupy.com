@@ -1,11 +1,13 @@
 @import "tailwindcss";
-@import "tw-animate-css";
+/*@import "tw-animate-css";
+@import "./prose.css";*/
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (.dark &);
+@plugin "@tailwindcss/typography";
 
 @theme {
-  --font-default: "Bricolage Grotesque";
-  --font-sans: "Bricolage Grotesque", serif;
+  --font-default: "Bricolage Grotesque Variable";
+  --font-sans: "Bricolage Grotesque Variable", sans;
   --font-fancy: "Bodoni Moda", serif;
   --font-mono: "JetBrains Mono", monospace;
   --font-serif: "Brygada 1918", serif;
@@ -32,53 +34,53 @@
   --color-grey-900: oklch(0.265 0.0142 248);
   --color-grey-950: oklch(0.183 0.0075 229);
 
-  --color-red-50: oklch(0.969 0.015 12.422);
-  --color-red-100: oklch(0.941 0.03 12.58);
-  --color-red-200: oklch(0.892 0.058 10.001);
-  --color-red-300: oklch(0.81 0.117 11.638);
-  --color-red-400: oklch(0.712 0.194 13.428);
-  --color-red-500: oklch(0.645 0.246 16.439);
-  --color-red-600: oklch(0.586 0.253 17.585);
-  --color-red-700: oklch(0.514 0.222 16.935);
-  --color-red-800: oklch(0.455 0.188 13.697);
-  --color-red-900: oklch(0.41 0.159 10.272);
-  --color-red-950: oklch(0.271 0.105 12.094);
+  --color-red-950: oklch(0.246 0.049 50.4);
+  --color-red-900: oklch(0.29 0.0777 41.5);
+  --color-red-800: oklch(0.362 0.102 33.9);
+  --color-red-700: oklch(0.465 0.131 23.7);
+  --color-red-600: oklch(0.515 0.152 25.9);
+  --color-red-500: oklch(0.566 0.149 26.9);
+  --color-red-400: oklch(0.614 0.145 26.3);
+  --color-red-300: oklch(0.678 0.125 25.1);
+  --color-red-200: oklch(0.766 0.0886 25.4);
+  --color-red-100: oklch(0.873 0.0489 29.1);
+  --color-red-50: oklch(0.973 0.0105 39.4);
 
-  --color-green-50: oklch(0.979 0.021 166.113);
-  --color-green-100: oklch(0.95 0.052 163.051);
-  --color-green-200: oklch(0.905 0.093 164.15);
-  --color-green-300: oklch(0.845 0.143 164.978);
-  --color-green-400: oklch(0.765 0.177 163.223);
-  --color-green-500: oklch(0.696 0.17 162.48);
-  --color-green-600: oklch(0.596 0.145 163.225);
-  --color-green-700: oklch(0.508 0.118 165.612);
-  --color-green-800: oklch(0.432 0.095 166.913);
-  --color-green-900: oklch(0.378 0.077 168.94);
-  --color-green-950: oklch(0.262 0.051 172.552);
+  --color-yellow-950: oklch(0.215 0.0194 88.7);
+  --color-yellow-900: oklch(0.267 0.0418 107);
+  --color-yellow-800: oklch(0.322 0.048 100);
+  --color-yellow-700: oklch(0.41 0.0545 81.3);
+  --color-yellow-600: oklch(0.55 0.0753 87.9);
+  --color-yellow-500: oklch(0.75 0.111 108);
+  --color-yellow-400: oklch(0.847 0.104 107);
+  --color-yellow-300: oklch(0.911 0.0763 105);
+  --color-yellow-200: oklch(0.948 0.0383 101);
+  --color-yellow-100: oklch(0.966 0.0236 125);
+  --color-yellow-50: oklch(0.997 0.0105 112);
 
-  --color-blue-50: oklch(0.943 0.00547 275);
-  --color-blue-100: oklch(0.853 0.0392 278);
-  --color-blue-200: oklch(0.747 0.0694 279);
-  --color-blue-300: oklch(0.637 0.0931 279);
-  --color-blue-400: oklch(0.513 0.102 280);
-  --color-blue-500: oklch(0.427 0.106 280);
-  --color-blue-600: oklch(0.343 0.0789 283);
-  --color-blue-700: oklch(0.287 0.0559 285);
-  --color-blue-800: oklch(0.211 0.0313 289);
-  --color-blue-900: oklch(0.245 0.0432 287);
-  --color-blue-950: oklch(0.195 0.024 292);
+  --color-green-950: #053325;
+  --color-green-900: #06402f;
+  --color-green-800: #145539;
+  --color-green-700: #0a6e4c;
+  --color-green-600: #0a895d;
+  --color-green-500: #00a36f;
+  --color-green-400: #19b984;
+  --color-green-300: #30d09a;
+  --color-green-200: #61e4b7;
+  --color-green-100: #a3f1d6;
+  --color-green-50: #f2fffa;
 
-  --color-yellow-50: oklch(0.188 0.0118 115);
-  --color-yellow-100: oklch(0.97 0.0138 125);
-  --color-yellow-200: oklch(0.953 0.0435 113);
-  --color-yellow-300: oklch(0.918 0.0619 114);
-  --color-yellow-400: oklch(0.855 0.0685 107);
-  --color-yellow-500: oklch(0.758 0.0712 107);
-  --color-yellow-600: oklch(0.592 0.0698 107);
-  --color-yellow-700: oklch(0.442 0.0564 116);
-  --color-yellow-800: oklch(0.334 0.0381 117);
-  --color-yellow-900: oklch(0.27 0.0247 115);
-  --color-yellow-950: oklch(0.225 0.017 118);
+  --color-blue-950: #24254a;
+  --color-blue-900: #28326f;
+  --color-blue-800: #263b8d;
+  --color-blue-700: #2e49a8;
+  --color-blue-600: #4366c6;
+  --color-blue-500: #6486e0;
+  --color-blue-400: #8b9ef0;
+  --color-blue-300: #a4b4fb;
+  --color-blue-200: #c6c8fe;
+  --color-blue-100: #e3dffd;
+  --color-blue-50: #f4f1fc;
 
   --color-black: #000;
   --color-white: #fff;
@@ -331,24 +333,3 @@
   --color-tw-black: #000;
   --color-tw-white: #fff;
 }
-
-.prose-grey {
-  --tw-prose-body: var(--color-grey-200);
-  --tw-prose-headings: var(--color-white);
-  --tw-prose-lead: var(--color-grey-300);
-  --tw-prose-links: var(--color-white);
-  --tw-prose-bold: var(--color-white);
-  --tw-prose-counters: var(--color-grey-400);
-  --tw-prose-bullets: var(--color-grey-600);
-  --tw-prose-hr: var(--color-grey-700);
-  --tw-prose-quotes: var(--color-grey-100);
-  --tw-prose-quote-borders: var(--color-grey-700);
-  --tw-prose-captions: var(--color-grey-400);
-  --tw-prose-code: var(--color-white);
-  --tw-prose-pre-code: var(--color-grey-300);
-  --tw-prose-pre-bg: alpha(var(--color-black), 0.5);
-  --tw-prose-th-borders: var(--color-grey-600);
-  --tw-prose-td-borders: var(--color-grey-700);
-}
-
-@plugin "@tailwindcss/typography";

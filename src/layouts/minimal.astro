@@ -1,0 +1,33 @@
+---
+import "$/styles/global.css";
+import Ogp from "$/lib/ogp.astro";
+
+const { class: className, title, description } = Astro.props;
+---
+
+<html lang="en">
+  <head>
+    <script is:inline>
+      if (
+        localStorage.getItem("theme").toString() == "dark" ||
+        (localStorage.getItem("theme").toString() == "auto" &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches)
+      ) {
+        document.documentElement.classList.add("dark");
+      }
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="description" content="Astro description" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <link rel="icon" href="/favicon.png" />
+
+    <Ogp title={title} description={description} />
+  </head>
+
+  <body class={className}>
+    <slot />
+  </body>
+</html>
