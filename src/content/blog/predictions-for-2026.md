@@ -1,3 +1,8 @@
+---
+title: Predictions for 2026
+date: 2025 12 31
+description: I try guess what will happen in 2026. OpenAI goes public, Anthropic gets acquired, Apples catches up in AI, Windows looses marketshare and GPT 6 is a massive upgrade. Also I try predict my GCSE results.
+---
 
 Every year people try to guess what will happen next year in tech, and almost everyone is wrong. But it's fun so here are my predictions for 2026, and why I think they will happen. 
 
