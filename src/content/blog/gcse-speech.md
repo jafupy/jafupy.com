@@ -1,8 +1,7 @@
 ---
 title: Why Polish Should Be Taught in Secondary Schools
 description: "I had to write & present a speech for my English Language GCSE. This is it. I ended up getting a merit."
-tags:
-  - This
+
 date: 2025 06 09
 ---
 

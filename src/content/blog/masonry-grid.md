@@ -1,9 +1,7 @@
 ---
 title: Simple CSS Masonry Grid
 date: 2025 07 04
-tags:
-  - CSS
-  - web
+
 description: 'Quick and easy CSS "masonry" / "waterfall" grid'
 ---
 

@@ -2,8 +2,7 @@
 title: Markdown Demo
 date: 2025 08 07
 description: I made ChatGPT write a document with many headings, so that I could test my notion style table of contents. It chose the scifi theme, not me.
-tags:
-  - Coding
+
 ---
 
 # **The Hollow Protocol: An Unofficial Technical Dossier**
