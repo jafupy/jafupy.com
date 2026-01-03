@@ -1,7 +1,7 @@
 ---
 title: I need a CMS
 date: 2026 01 03
-description: I need a CMS, but I don't like the current options. So I'm creating my own: Crawlspace.
+description: "I need a CMS, but I don't like the current options. So I'm creating my own: Crawlspace."
 ---
 
 I need a CMS, but Ghost, Contentful, Strapi, etc. just don't do what I want. 
