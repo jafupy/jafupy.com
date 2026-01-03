@@ -1,12 +1,12 @@
 ---
 title: I need a CMS
 date: 2026 01 03
-description: I need a CMS
+description: I need a CMS, but I don't like the current options. So I'm creating my own: Crawlspace.
 ---
 
 I need a CMS, but Ghost, Contentful, Strapi, etc. just don't do what I want. 
 
-My website — this website — is built with Astro, with a couple svelte sprinkles and some vanilla JS. Like any sane person, I use Astro's content collection for my blog, with my `content/blog` folder symlinked to my Obsidian vault, where I write in a pretty GUI with pretty formatting. This works, obviously, but I want more. I need more. I need a CMS. But then I can't use my content collections. I want content collections. 
+My website — this website — is built with Astro, a couple Svelte sprinkles and some vanilla JS. Like any sane person, I use Astro's content collections for my blog, with my `content/blog` folder symlinked to my Obsidian vault, where I write in a pretty GUI with pretty formatting. This works, obviously, but I want more. I need more. I need a CMS. But then I can't use my content collections. I want content collections. 
 
 Content collections allow me to have type-safe markdown and other content, and I like that. But I also want to be able to edit from anywhere, and since I'm going through a rewrite of my site, it's annoying to have to manually commit via [github.com](https://github.com). 
 
@@ -18,11 +18,11 @@ So I'm building my own CMS.
 
 ## Meet Crawlspace
 
-Meet Crawlspace, a *different* kind of CMS. No more databases, no more random website to visit, just a route you add to your website and just *works.* No setup, other than whitelisting your github account.
+Meet Crawlspace, a *different* kind of CMS. No more databases, no more random websites to visit, just a route you add to your website and just *works.* No setup, other than whitelisting your github account and running an npx command.
 
-With Crawlspace, you have one source of truth — your schema. No more GUI configs, no more copying over settings, making sure they're perfect reflections in the mirror. When you change your config, Crawlspace adapts. That's the magic of what I'm building. 
+With Crawlspace, you have one source of truth — your schema. No more GUI configs, no more copying over settings, no more making sure they're perfect reflections in the mirror. When you change your config, Crawlspace adapts. That's the magic of what I'm building. 
 
-Since it uses the content folder as the "database," in dev you don't want to have to dance with Github, having to fetch after every change. So Crawlspace uses the filesystem to edit your content directly. In production, it does the dance. After you push, assuming Vercel / GH pages / whatever is correctly set up and connected to the github repo, the changes automatically trigger a rebuild, allowing you to write, edit, and forget. The changes automatically propagate, and it's like magic.
+Since it uses the content folder as the "database," in dev you don't want to have to dance with Github, having to fetch after every change. So Crawlspace uses the filesystem to edit your content directly. In production, it does the dance. After you push, assuming Vercel / GH pages / whatever is correctly set up and connected to the Github repo, the changes automatically trigger a rebuild, allowing you to write, edit, and forget. The changes automatically propagate and it's like magic.
 
 So, for example, let's take the following schema:
 
@@ -41,17 +41,17 @@ Crawlspace sees the `.md` pattern, and detects that this is markdown. This enabl
 
 When you're editing your content, any changes get auto-saved to local storage, and then when you hit publish, a commit will get generated and pushed to the Github repo, using your Github account. 
 
-How does it get your Github account? Simple: you sign in via Github's OAuth. This allows for easy authentication & permission management. Anyone who has write access to repo can edit, allowing for simple auth. In dev there is no auth, as if you're running it locally you obviously have read/write permissions.
+How does it get your Github account? Simple: you sign in via Github's OAuth. This allows for easy authentication & permission management. Anyone who has write access to repo can edit. In dev there is no auth, since if you're running it locally you obviously have read/write permissions.
 
 ## The Stack
 
-I'm going to use Svelte. I love svelte. It's pretty. I could use react, but then I get re-render anxiety, and Svelte doesn't have the overhead of the VDOM. I plan on using TipTap for the editor, and I'll in-house basically everything else, other than the Github SDK and FS. I'll be using Shadcn-svelte, but heavily modified. I really like the aesthetic of [Zed](https://zed.dev), with it's sharp corners and brutalist aesthetic. For the colours, I'm leaning towards a greenish grey and orange.  
+I'm going to use Svelte. I love svelte. It's pretty. I could use react, but then I get re-render anxiety. Svelte also has the benefit of not having the overhead of the VDOM. I plan on using TipTap for the editor, and I'll in-house basically everything else, other than the Github SDK and FS. I'll be using Shadcn-svelte, but heavily modified. I really like the aesthetic of [Zed](https://zed.dev), with it's sharp corners and brutalist aesthetic. For the colours, I'm leaning towards a greenish grey and orange.  
 
 I haven't started working on Crawlspace, so either @ me on twitter (@jafupy) or email me if you have ideas, want to help or just want to pester me. I'll *probably* reply. It's that big contact button if you move your eyes up a bit. 
 
 ## The Roadmap
 
-I expect the first version to be out by the end of January, and V1 by summer. Why so long? I don't vibe code. I also have my GCSEs coming up in June, so I need to prioritise that over coding. I'm going to prioritise frontmatter & JSON first, using an interim plaintext editor. I will also have manual schemas for a while, since the detection will most likely be complicated and will take a while to reverse engineer.
+I expect the first version to be out by the end of January, and V1 by summer. Why so long? I don't vibe code. I also have my GCSEs coming up in June, so I need to prioritise that over coding. As i'm writing Crawlspace, I'm going to prioritise figuring out the frontmatter & JSON first, using an interim plaintext editor. I will also have manual schemas for a while, since the detection will most likely be complicated and will take a while to reverse engineer. This is the full roadmap & plan of how I'm going to build it:
 
 ### V0.1
 
@@ -78,10 +78,14 @@ The MVP. The first beta.
 
 - Github integration
 
+### V0.6
+
+- CLI 
+
 ### 1.0
 
 - Making it pretty
-- Polish
+- Polish (no not the country)
 
 ### What I'm **NOT** Adding
 
