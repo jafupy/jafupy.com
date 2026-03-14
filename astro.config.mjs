@@ -17,6 +17,8 @@ export default defineConfig({
       alias: {
         $: "/src",
       },
+
+      noExternal: ["@lucide/svelte"],
     },
 
     plugins: [tailwindcss()],

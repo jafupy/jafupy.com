@@ -19,9 +19,9 @@
     "@fontsource-variable/cormorant": "^5.2.8",
     "@fontsource-variable/jetbrains-mono": "^5.2.8",
     "@fontsource/cormorant-garamond": "^5.2.11",
+    "@lucide/svelte": "^0.577.0",
     "@tailwindcss/vite": "^4.2.1",
     "astro": "^6.0.4",
-    "lucide-svelte": "^0.577.0",
     "svelte": "^5.53.12",
     "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3"
