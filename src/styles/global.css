@@ -1,62 +1,26 @@
-@import url("https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Brygada+1918:ital,wght@0,400..700;1,400..700&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap");
-@import "./tw.css";
+@import "tailwindcss";
+@import "./typo.css";
 
-body {
-  --grid-size: 5rem;
-  --grid-color: oklch(from var(--color-grey-900) l c h / 50%);
-  /* --grid-color: oklch(from var(--color-old-rose) l c h / 50%); */
-  --grid-bg-color: var(--color-grey-950);
+@layer base, yap, utilities;
 
-  background:
-    linear-gradient(
-      0deg,
-      transparent 24%,
-      var(--grid-color) 25%,
-      var(--grid-color) 26%,
-      transparent 27%,
-      transparent 74%,
-      var(--grid-color) 75%,
-      var(--grid-color) 76%,
-      transparent 77%,
-      transparent
-    ),
-    linear-gradient(
-      90deg,
-      transparent 24%,
-      var(--grid-color) 25%,
-      var(--grid-color) 26%,
-      transparent 27%,
-      transparent 74%,
-      var(--grid-color) 75%,
-      var(--grid-color) 76%,
-      transparent 77%,
-      transparent
-    );
-  background-size: var(--grid-size) var(--grid-size);
-  background-color: var(--color-grey-950);
-}
-body::after {
-  z-index: -49;
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 100%;
-  background: radial-gradient(
-    circle at center,
-    transparent,
-    oklch(from var(--grid-bg-color) l c h / 0.5) 80%
-  );
-}
-.prose
-  :where(a):not(:where([class~="not-prose"], [class~="not-prose"] *)):hover {
-  color: var(--color-old-rose);
-}
-.prose :where(a):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
-  @apply transition-colors;
+@custom-variant dark (.dark &);
+
+#site::-webkit-scrollbar {
+  width: 0;
 }
 
-* {
-  @apply transition-all;
+@theme {
+  --font-default: "Brygada 1918 Variable", sans;
+  --font-sans: "Bricolage Grotesque Variable", sans;
+  --font-mono: "JetBrains Mono Variable";
+  --font-serif: "Brygada 1918 Variable", serif;
+
+  --spacing-ch-sm: 60ch;
+  --spacing-ch-md: 75ch;
+  --spacing-ch-lg: 90ch;
+  --spacing-ch-xl: 120ch;
+
+  --text-2xs: 0.625rem;
+
+  --color-old-rose: #cb8b8c;
 }

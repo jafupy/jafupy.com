@@ -18,6 +18,7 @@ Temu didn't get shut down and the Apple Vision Pro didn't influence the Meta Que
 Now, for the partially right:
 - Windows for arm will take off
 - Disney becomes less progressive
+
 While the introduction of Qualcomm chips in laptops improved the windows for Arm situation, the arm laptops didn't sell very well. And whether Disney became less wokeprogressive that's subjective, and I don't really follow their movies any more. But in Elio, they forced any sort of LGBT and finding out your identity themes that were originally going to be there out, delaying the movie by a year. :shrug:
 Now, for what. I got correct. Are you proud of me yet mom?
 

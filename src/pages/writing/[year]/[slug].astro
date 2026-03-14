@@ -1,0 +1,28 @@
+---
+import { getCollection, render } from "astro:content";
+import Root from "$/layouts/minimal.astro";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  return posts.map((post) => ({
+    params: {
+      slug: post.id,
+      year: new Date(post.data.date).getFullYear().toString(),
+    },
+    props: post,
+  }));
+}
+
+const post = Astro.props;
+const { Content } = await render(post);
+---
+
+<Root title={post.data.title}>
+  <article
+    class="w-full rounded-t-2xl bg-white/5 border-[0.5px] border-white/13 border-b-0 backdrop-blur-xl"
+  >
+    <main class="px-7 py-5 yap">
+      <Content />
+    </main>
+  </article>
+</Root>
