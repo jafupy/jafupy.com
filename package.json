@@ -1,0 +1,29 @@
+{
+  "name": "astro",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/svelte": "^8.0.0",
+    "@astrojs/vercel": "^10.0.0",
+    "@fontsource-variable/bricolage-grotesque": "^5.2.10",
+    "@fontsource-variable/brygada-1918": "^5.2.8",
+    "@fontsource-variable/cormorant": "^5.2.8",
+    "@fontsource-variable/jetbrains-mono": "^5.2.8",
+    "@fontsource/cormorant-garamond": "^5.2.11",
+    "@tailwindcss/vite": "^4.2.1",
+    "astro": "^6.0.4",
+    "lucide-svelte": "^0.577.0",
+    "svelte": "^5.53.12",
+    "tailwindcss": "^4.2.1",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,62 @@
+---
+import Root from "../layouts/minimal.astro";
+---
+
+<Root title="I need a CMS">
+  <div
+    class="rounded-t-2xl bg-white/5 border-[0.5px] border-white/13 border-b-0 backdrop-blur-xl"
+  >
+    <div class="px-7 py-5 border-b border-white/7">
+      <div class="yap">
+
+      <h1>Heading one</h1>
+      <h2>Heading two</h2>
+      <h3>Heading three</h3>
+      <h4>Heading four</h4>
+
+      <p>This is a paragraph with <strong>bold text</strong>, <em>italic text</em>, and <strong><em>bold italic</em></strong>. It also has an <a href="#">inline link</a> and some <code>inline code</code> for good measure.</p>
+
+      <p>A second paragraph to check spacing between paragraphs. Bytes don't arrive in neat packets. They arrive in whatever shape the kernel feels like — sometimes a full message, sometimes half.</p>
+
+      <blockquote>
+        <p>This is a blockquote. It should be visually distinct from the surrounding prose without being too loud.</p>
+      </blockquote>
+
+      <h2>h2 Lists</h2>
+
+      <ul>
+        <li>Unordered item one</li>
+        <li>Unordered item two</li>
+        <li>Unordered item three with a bit more text to see how wrapping behaves</li>
+      </ul>
+
+      <ol>
+        <li>Ordered item one</li>
+        <li>Ordered item two</li>
+        <li>Ordered item three</li>
+      </ol>
+
+      <h2>h2 Code</h2>
+
+      <p>Inline code looks like <code>this.value = 42</code> and sits in the flow of text.</p>
+
+      <pre><code>fn main() {"{"}
+          let x: u32 = 42;
+          println!("hello, {}", x);
+      }</code></pre>
+
+      <hr>
+
+      <h2>After a divider</h2>
+
+      <p>Content after a horizontal rule. The rule should feel like a section break, not a decoration.</p>
+
+      <figure>
+        <img src="https://placehold.co/600x300" alt="A placeholder image" />
+        <figcaption>This is a figure caption — small, muted, below the image.</figcaption>
+      </figure>
+
+      </div>
+    </div>
+  </div>
+</Root>

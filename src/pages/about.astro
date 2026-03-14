@@ -1,0 +1,66 @@
+---
+import Root from "$/layouts/minimal.astro";
+import { GithubIcon, MailOpenIcon, TwitterIcon } from "lucide-svelte";
+
+import { getCollection } from "astro:content";
+
+const posts = (await getCollection("blog"))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .slice(0, 5);
+
+const latest = posts[0];
+---
+
+<Root title="About">
+  <div
+    class="rounded-t-2xl bg-white/5 border-[0.5px] border-white/13 border-b-0 backdrop-blur-xl"
+  >
+    <!-- Blurb -->
+    <div class="px-7 py-5 border-b border-white/7 yap">
+      <p>
+        I'm Jacob — a 16-year-old polish idiot who yaps, yaps in code and makes
+        noise with a guitar in southern England.
+      </p>
+
+      <p>
+        I write mostly Rust and J|TS. Currently I'm working on Crumbs, a
+        lightweight process orchestrator for macOS that stops me running a dozen
+        servers at once, and Spread, an email management tool that will be its
+        first plugin.
+      </p>
+
+      <p>
+        I keep a blog here — mostly technical, occasionally not. I also write
+        fiction. My current project is Five, a dystopian novella about a
+        paranoid unnamed protagonist and a resistance cell called Dead Hand,
+        which stemmed from a GCSE English Language Paper 1 Q5 prompt I did at
+        school. It lives in my Obsidian vault alongside countless pages of
+        worldbuilding and rambling for other fantasy projects I've been working
+        on for years.
+      </p>
+
+      <p>
+        I play fingerstyle guitar. I'm working on an original piece called
+        Masquerade in open Gm tuning.
+      </p>
+
+      <p>I'm studying CS, Physics, and Maths for my GCSEs.</p>
+    </div>
+
+    <div class="flex items-center justify-between px-7 py-5">
+      <span class="font-mono-custom text-[12px] text-mauve-400"
+        >jacob@jafupy.com</span
+      >
+      <div class="flex gap-4">
+        <span
+          class="font-mono-custom text-[11px] text-mauve-400 cursor-pointer hover:text-mauve-100"
+          >github ↗</span
+        >
+        <span
+          class="font-mono-custom text-[11px] text-mauve-400 cursor-pointer hover:text-mauve-100"
+          >rss ↗</span
+        >
+      </div>
+    </div>
+  </div>
+</Root>

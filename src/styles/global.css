@@ -1,0 +1,26 @@
+@import "tailwindcss";
+@import "./typo.css";
+
+@layer base, yap, utilities;
+
+@custom-variant dark (.dark &);
+
+#site::-webkit-scrollbar {
+  width: 0;
+}
+
+@theme {
+  --font-default: "Brygada 1918 Variable", sans;
+  --font-sans: "Bricolage Grotesque Variable", sans;
+  --font-mono: "JetBrains Mono Variable";
+  --font-serif: "Brygada 1918 Variable", serif;
+
+  --spacing-ch-sm: 60ch;
+  --spacing-ch-md: 75ch;
+  --spacing-ch-lg: 90ch;
+  --spacing-ch-xl: 120ch;
+
+  --text-2xs: 0.625rem;
+
+  --color-old-rose: #cb8b8c;
+}

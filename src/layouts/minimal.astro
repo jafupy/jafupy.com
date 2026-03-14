@@ -1,0 +1,215 @@
+---
+import "@fontsource-variable/bricolage-grotesque";
+import "@fontsource-variable/jetbrains-mono";
+import "@fontsource-variable/brygada-1918";
+
+import "$/styles/global.css";
+
+const { title } = {
+  title: "JaFu.py",
+  ...Astro.props,
+};
+
+function stringToSeed(str: string): number {
+  return str.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+}
+
+function noise(x: number, seed: number): number {
+  const n = Math.sin(x * 127.1 + seed * 311.7) * 43758.5453;
+  return n - Math.floor(n);
+}
+
+function lerpColor(t: number): string {
+  const h = 300;
+  const s = t * 7.69;
+  const l = 100 - t * (100 - 94.9);
+  return `hsl(${h}deg ${s}% ${l}%)`;
+}
+
+// Usage
+//
+const letters = title.split("");
+const seed = stringToSeed(title);
+const randoms = letters.map((letter, i) => {
+  return noise(i, seed); // stable per letter per string
+});
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title} | V2b</title>
+    <link rel="icon" href="/favicon.png" />
+  </head>
+  <body class="bg-mauve-900 text-mauve-50 p-8 pb-0 relative min-h-screen">
+    <header class="fixed top-6 left-1/2 -translate-x-1/2 z-50000 flex">
+      <nav
+        class="flex w-fit gap-4 px-4 py-2 rounded-xl border border-mauve-100/20 backdrop-blur-md transition-colors bg-mauve-800/20 hover:bg-mauve-950/30 text-sm items-center justify-center"
+      >
+        <a
+          href="/"
+          class="group flex items-center justify-center gap-1.5 hover:text-old-rose transition-colors"
+        >
+          <!-- <Logo
+            class="size-6 rounded-sm group-hover:scale-110 transition-transform group-active:scale-90"
+          /> -->
+          Jafu.py
+          <span class="sr-only">Home</span>
+        </a>
+        <div class="size-1 bg-mauve-300 rounded-full"></div>
+        <a href="/about" class="hover:text-old-rose transition-colors">About</a>
+        <a href="/writing" class="hover:text-old-rose transition-colors"
+          >Writing</a
+        >
+        <a
+          href="mailto:jacob@jafupy.com"
+          class="group relative hover:text-old-rose transition-colors flex items-center justify-center gap-2"
+          >Contact
+          <!-- <ExternalLink class="size-3.75" /> -->
+          <span
+            id="contact_tooltip"
+            class="invisible select-text pointer-events-auto not-group-hover:delay-200 overflow-visible group-hover:visible absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-mauve-900 text-mauve-100 text-sm px-4 py-1.5 rounded-lg border border-mauve-300/20 whitespace-nowrap before:content-[''] before:absolute before:bottom-full before:translate-y-1/2 before:-z-2 before:left-1/2 before:-translate-x-1/2 before:border-l before:border-t before:border-mauve-300/20 before:bg-mauve-900 before:rounded-tl-xs before:size-2 before:rotate-45"
+          >
+            hello@jafupy.com
+          </span>
+        </a>
+      </nav>
+    </header>
+
+    <h1
+      id="wordmark"
+      class="font-serif fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-3/5 leading-none -z-1 font-semibold max-w-[max(calc(100vw-16rem),80vw)] w-full"
+    >
+      {title}
+    </h1>
+    <div id="content" class="max-w-ch-md mx-auto p-0">
+      <slot />
+    </div>
+    <dither-shader
+      halftone="1"
+      color="#cb8b8c80"
+      brightness="0"
+      mode="noise"
+      dot-size="3"
+      rotation="32"
+      jitter="0.8"
+      warp="50"
+      blue-noise="0.45"
+      class="fixed!"></dither-shader>
+  </body>
+</html>
+
+<script>
+  import "$/lib/dither";
+
+  let h1 = document.querySelector("h1#wordmark")! as HTMLElement;
+  let content = document.querySelector("div#content")! as HTMLElement;
+
+  type EasingFunction = (t: number) => number;
+
+  interface OpacityFromScrollOptions {
+    scrollY: number;
+    start?: number;
+    end?: number;
+    easing?: EasingFunction;
+  }
+
+  function opacityFromScroll({
+    scrollY,
+    start = 0,
+    end = 500,
+    easing = (t: number) => t,
+  }: OpacityFromScrollOptions): number {
+    let t = (scrollY - start) / (end - start);
+
+    if (t < 0) t = 0;
+    if (t > 1) t = 1;
+
+    const eased = easing(t);
+    return 1 - eased;
+  }
+
+  const easeOut: EasingFunction = (t) => 1 - (1 - t) ** 2;
+  window.addEventListener("scroll", () => {
+    const opacity = opacityFromScroll({
+      scrollY: window.scrollY,
+      start: 0,
+      end: 400,
+      easing: easeOut,
+    });
+    const blur = (1 - opacity) * 15; // 0px at full opacity, 10px when gone
+    h1.style.filter = `blur(${blur}px)`;
+    h1.style.opacity = Math.max(opacity, 0.3).toString();
+  });
+
+  type FitHeadingOptions = {
+    element: HTMLElement;
+    paddingRem?: number;
+    maxLines?: number;
+  };
+
+  export async function fitHeading({
+    element,
+    paddingRem = 8,
+  }: FitHeadingOptions) {
+    await document.fonts.ready;
+
+    const maxLines = element.innerText.length > 15 ? 2 : 1;
+
+    const root = parseFloat(
+      getComputedStyle(document.documentElement).fontSize,
+    );
+
+    const maxWidth = window.innerWidth - paddingRem * root * 2;
+
+    element.style.maxWidth = `${maxWidth}px`;
+    element.style.whiteSpace = "normal";
+
+    let size = 8;
+    let lastGood = size;
+
+    const getLines = () => {
+      const style = getComputedStyle(element);
+
+      const lineHeight =
+        style.lineHeight === "normal"
+          ? parseFloat(style.fontSize) * 1.2
+          : parseFloat(style.lineHeight);
+
+      return Math.round(element.scrollHeight / lineHeight);
+    };
+
+    let lo = 8;
+    let hi = 2000;
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1;
+      element.style.fontSize = `${mid}px`;
+      const lines = getLines();
+      if (lines > maxLines || element.scrollWidth > maxWidth) {
+        hi = mid - 1;
+      } else {
+        lastGood = mid;
+        lo = mid + 1;
+      }
+    }
+
+    element.style.fontSize = `${lastGood}px`;
+  }
+
+  function resize() {
+    fitHeading({
+      element: h1,
+      paddingRem:
+        window.innerWidth > content.clientWidth + 64
+          ? 8
+          : (window.innerWidth - content.clientWidth) / 2 / 16 + 1.5,
+    }).then(() => {
+      const wordmarkBottom = h1.getBoundingClientRect().bottom;
+      content.style.marginTop = `${wordmarkBottom + 32}px`;
+    });
+  }
+  resize();
+  window.addEventListener("resize", resize);
+</script>
