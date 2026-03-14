@@ -89,7 +89,7 @@ const randoms = letters.map((letter, i) => {
     </div>
     <dither-shader
       halftone="1"
-      color="#cb8b8c80"
+      color="#cb8b8c68"
       brightness="0"
       mode="noise"
       dot-size="3"
@@ -97,6 +97,8 @@ const randoms = letters.map((letter, i) => {
       jitter="0.8"
       warp="50"
       blue-noise="0.45"
+      animate="true"
+      speed="0.00000015"
       class="fixed!"></dither-shader>
   </body>
 </html>
@@ -106,20 +108,6 @@ const randoms = letters.map((letter, i) => {
 
   let h1 = document.querySelector("h1#wordmark")! as HTMLElement;
   let content = document.querySelector("div#content")! as HTMLElement;
-  const shader = document.querySelector("dither-shader")! as HTMLElement & {
-    seed: number;
-  };
-
-  let t = 0;
-  let last = performance.now();
-  function animate() {
-    const now = performance.now();
-    const dt = now - last; // milliseconds since last frame
-    last = now;
-    shader.seed = (shader.seed + dt * 5e-10) % 1; // slower, smooth, frame-rate safe
-    requestAnimationFrame(animate);
-  }
-  animate();
 
   type EasingFunction = (t: number) => number;
 
