@@ -1,125 +1,15 @@
-/**
- * <dither-shader> — WebGL2 halftone dithering overlay
- *
- * A zero-dependency custom element that renders a GPU-accelerated halftone
- * dither pattern over its host area. Supports two noise modes (fbm / random),
- * full CSS colour theming, and fine-grained control over dot appearance.
- *
- * @element dither-shader
- *
- * ─── COLOUR ─────────────────────────────────────────────────────────────────
- *
- * @attr {CSSColor} color
- *   Foreground (dot) colour. Accepts any valid CSS colour string.
- *   Default: #000000
- *   Examples: "red", "#ff6600", "hsl(200 80% 50%)", "rgba(0,0,0,0.5)"
- *
- * @attr {CSSColor} background
- *   Background (gap) colour. Accepts any valid CSS colour string.
- *   Default: transparent (rgba(0,0,0,0))
- *   Examples: "white", "#f5f0e8", "oklch(95% 0.02 90)"
- *
- * @attr {number} halftone
- *   Blend between smooth stipple dithering (0) and structured halftone dot
- *   grid (1). At 0, luminance is thresholded against random noise — no cell
- *   structure, no contour artifacts. Intermediate values mix both.
- *   Default: 1
- *
- * ─── PATTERN ─────────────────────────────────────────────────────────────────
- *
- * @attr {"noise"|"random"} mode
- *   Pattern generation mode.
- *   - "noise"  — smooth fbm noise (default)
- *   - "random" — fully random per-pixel hash
- *   Default: "noise"
- *
- * @attr {number} dot-size
- *   Halftone cell size in pixels. Larger = bigger dots.
- *   Default: 6
- *
- * @attr {number} rotation
- *   Rotation of the halftone grid in degrees.
- *   Default: 0
- *
- * @attr {number} contrast
- *   Contrast multiplier applied to the noise luminance.
- *   Default: 1
- *
- * @attr {number} brightness
- *   Brightness offset applied after contrast. Range: roughly -1 to 1.
- *   Default: 0
- *
- * ─── DISTORTION ──────────────────────────────────────────────────────────────
- *
- * @attr {number} jitter
- *   Per-cell size jitter. Adds organic variance to dot radii.
- *   Default: 0
- *
- * @attr {number} warp
- *   Domain-warp strength. Displaces the grid before sampling.
- *   Default: 0
- *
- * @attr {number} warp-scale
- *   Frequency of the warp noise. Higher = finer warp.
- *   Default: 0.002
- *
- * @attr {number} blue-noise
- *   Amount of blue-noise dither added on top of the pattern.
- *   Default: 0
- *
- * ─── NOISE TUNING ────────────────────────────────────────────────────────────
- *
- * @attr {number} noise-scale
- *   Zoom / frequency of the fbm noise. Higher = more zoomed in.
- *   Default: 3
- *
- * @attr {number} noise-octaves
- *   Number of fbm octaves (1–6). More = more detail, slightly slower.
- *   Default: 4
- *
- * ─── USAGE ───────────────────────────────────────────────────────────────────
- *
- * Basic overlay (black dots on transparent):
- *   <dither-shader></dither-shader>
- *
- * Cream dots on dark background:
- *   <dither-shader color="#f5f0e8" background="#1a1a1a"></dither-shader>
- *
- * Tinted noise with warp:
- *   <dither-shader
- *     color="hsl(30 90% 55%)"
- *     background="hsl(220 20% 10%)"
- *     dot-size="8"
- *     warp="1.5"
- *     noise-octaves="6">
- *   </dither-shader>
- *
- * ─── NOTES ───────────────────────────────────────────────────────────────────
- *
- * - Requires WebGL2. No fallback is provided.
- * - Default styles (position, inset, pointer-events) are injected as a
- *   low-specificity stylesheet so they can be freely overridden by external CSS.
- *   The default z-index is -1, so all sibling content renders above the shader
- *   without any extra configuration. Override with z-index in your own CSS to
- *   layer the shader above specific elements.
- * - Colour parsing uses an offscreen <canvas> and reads back a single pixel,
- *   so any colour the browser can parse (including oklch, color-mix, etc.) works.
- */
-
-// Inject default styles once per document, at low specificity, so external
-// CSS (including z-index) always wins via the normal cascade.
 if (!document.getElementById("dither-shader-defaults")) {
   const s = document.createElement("style");
   s.id = "dither-shader-defaults";
   s.textContent = `
-dither-shader {
+:where(dither-shader) {
   position: absolute;
   inset: 0;
   display: block;
   pointer-events: none;
   z-index: -1;
 }
-dither-shader > canvas {
+:where(dither-shader > canvas) {
   width: 100%;
   height: 100%;
   display: block;
@@ -127,6 +17,7 @@ dither-shader > canvas {
   `.trim();
   document.head.appendChild(s);
 }
+
 class DitherShader extends HTMLElement {
   static get observedAttributes() {
     return [
@@ -144,12 +35,12 @@ class DitherShader extends HTMLElement {
       "noise-scale",
       "noise-octaves",
       "halftone",
+      "seed",
     ];
   }
 
   constructor() {
     super();
-    // Light DOM — no shadow root
   }
 
   connectedCallback() {
@@ -165,6 +56,7 @@ class DitherShader extends HTMLElement {
       alpha: true,
       antialias: false,
     });
+
     this._init();
 
     this._ro = new ResizeObserver(() => {
@@ -183,15 +75,15 @@ class DitherShader extends HTMLElement {
     this._draw();
   }
 
-  // ─── Private ───────────────────────────────────────────────────────────────
+  get seed() {
+    return parseFloat(this.getAttribute("seed")) || 0;
+  }
 
-  /**
-   * Parse any CSS colour string → [r, g, b, a] in 0–1 range.
-   * Falls back to [0, 0, 0, 0] for invalid / missing values.
-   *
-   * @param {string|null} css
-   * @returns {[number,number,number,number]}
-   */
+  set seed(v) {
+    this.setAttribute("seed", v);
+    this._draw();
+  }
+
   _parseColor(css) {
     if (!css) return [0, 0, 0, 0];
     try {
@@ -199,7 +91,7 @@ class DitherShader extends HTMLElement {
       c.width = 1;
       c.height = 1;
       const ctx = c.getContext("2d");
-      ctx.fillStyle = css; // browser normalises the colour
+      ctx.fillStyle = css;
       ctx.fillRect(0, 0, 1, 1);
       const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;
       return [r / 255, g / 255, b / 255, a / 255];
@@ -217,15 +109,12 @@ class DitherShader extends HTMLElement {
 
     const vert = `#version 300 es
 precision highp float;
-
 const vec2 pos[3]=vec2[](
   vec2(-1.0,-1.0),
   vec2( 3.0,-1.0),
   vec2(-1.0, 3.0)
 );
-
 out vec2 vUv;
-
 void main(){
   vec2 p=pos[gl_VertexID];
   vUv=(p+1.0)*0.5;
@@ -234,10 +123,8 @@ void main(){
 
     const frag = `#version 300 es
 precision highp float;
-
 uniform vec2 resolution;
-uniform int  mode;
-
+uniform int mode;
 uniform float dotSize;
 uniform float rotation;
 uniform float contrast;
@@ -247,19 +134,21 @@ uniform float warp;
 uniform float warpScale;
 uniform float blueNoise;
 uniform float noiseScale;
-uniform int   noiseOctaves;
+uniform int noiseOctaves;
 uniform float useHalftone;
+uniform float seed; // looping seed
 
-// ── Colour ──
-uniform vec4 fgColor;   // dot colour
-uniform vec4 bgColor;   // background colour
+uniform vec4 fgColor;
+uniform vec4 bgColor;
 
-in  vec2 vUv;
+in vec2 vUv;
 out vec4 fragColor;
 
 float hash(vec2 p){
-  p=fract(p*0.3183099+.1);
-  p*=17.0;
+  float s = sin(seed * 6.2831853);
+  float c = cos(seed * 6.2831853);
+  p = fract(p*0.3183099 + 0.1 + vec2(s,c));
+  p *= 17.0;
   return fract(p.x*p.y*(p.x+p.y));
 }
 
@@ -290,14 +179,14 @@ mat2 rot(float a){
   return mat2(c,-s,s,c);
 }
 
-float halftone(vec2 px, float lum){
-  vec2  cell  = floor(px/dotSize);
-  vec2  local = fract(px/dotSize)-0.5;
-  float r     = lum*0.5;
-  float n     = hash(cell);
-  r          *= 1.0+jitter*(n-0.5);
-  float d     = length(local);
-  float aa    = fwidth(d);
+float halftone(vec2 px,float lum){
+  vec2 cell = floor(px/dotSize);
+  vec2 local = fract(px/dotSize)-0.5;
+  float r = lum*0.5;
+  float n = hash(cell);
+  r *= 1.0+jitter*(n-0.5);
+  float d = length(local);
+  float aa = fwidth(d);
   return smoothstep(r,r-aa,d);
 }
 
@@ -308,18 +197,15 @@ void main(){
   float warpN = hash(floor(px*warpScale));
   px += warp*warpN*20.0;
 
-  float lum = (mode==0) ? fbm(vUv*noiseScale) : hash(px*0.01);
-
-  lum = (lum-0.5)*contrast+0.5+brightness;
+  float lum = (mode==0)?fbm(vUv*noiseScale):hash(px*0.01);
+  lum = (lum-0.5)*contrast + 0.5 + brightness;
   lum = clamp(lum,0.0,1.0);
   lum += blueNoise*(hash(px)-0.5);
 
-  // 0 = random stipple dither (no contours), 1 = structured halftone grid
-  float stipple  = step(hash(px * 0.7193), lum);
-  float dots     = halftone(px, lum);
-  float mask     = mix(stipple, dots, useHalftone);
+  float stipple = step(hash(px*0.7193), lum);
+  float dots = halftone(px, lum);
+  float mask = mix(stipple, dots, useHalftone);
 
-  // Blend background → foreground using dot mask
   fragColor = mix(bgColor, fgColor, mask);
 }`;
 
@@ -335,9 +221,6 @@ void main(){
     gl.attachShader(this.prog, compile(gl.FRAGMENT_SHADER, frag));
     gl.linkProgram(this.prog);
 
-    // Bind a VAO to silence the "attrib 0 not enabled" warning.
-    // The shader uses gl_VertexID only, but WebGL requires attrib 0
-    // to be array-enabled to avoid expensive software emulation on desktop GL.
     this.vao = gl.createVertexArray();
     gl.bindVertexArray(this.vao);
     const buf = gl.createBuffer();
@@ -349,7 +232,6 @@ void main(){
     gl.enable(gl.BLEND);
     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
-    // Cache uniform locations — getUniformLocation is not free
     const u = (name) => gl.getUniformLocation(this.prog, name);
     this._u = {
       resolution: u("resolution"),
@@ -367,6 +249,7 @@ void main(){
       useHalftone: u("useHalftone"),
       fgColor: u("fgColor"),
       bgColor: u("bgColor"),
+      seed: u("seed"),
     };
 
     this._dirty = true;
@@ -390,11 +273,9 @@ void main(){
     this._dirty = false;
 
     this._resize();
-
     const gl = this.gl;
-    const prog = this.prog;
     const u = this._u;
-    gl.useProgram(prog);
+    gl.useProgram(this.prog);
 
     gl.uniform2f(u.resolution, this.canvas.width, this.canvas.height);
     gl.uniform1i(u.mode, this.getAttribute("mode") === "noise" ? 0 : 1);
@@ -409,6 +290,7 @@ void main(){
     gl.uniform1f(u.noiseScale, this._getAttr("noise-scale", 3));
     gl.uniform1i(u.noiseOctaves, this._getAttr("noise-octaves", 4));
     gl.uniform1f(u.useHalftone, this._getAttr("halftone", 1));
+    gl.uniform1f(u.seed, this.seed % 1); // looping seed
 
     const fg = this._parseColor(this.getAttribute("color") ?? "#000000");
     const bg = this._parseColor(

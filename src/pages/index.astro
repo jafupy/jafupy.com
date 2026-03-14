@@ -5,7 +5,7 @@ import { GithubIcon, MailOpenIcon, TwitterIcon } from "@lucide/svelte";
 import { getCollection } from "astro:content";
 
 const posts = (await getCollection("blog"))
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf())
+  .sort((a: any, b: any) => b.data.date.valueOf() - a.data.date.valueOf())
   .slice(0, 5);
 
 const latest = posts[0];
@@ -91,7 +91,7 @@ const latest = posts[0];
     </div>
 
     {
-      posts.slice(1, 5).map((post) => (
+      posts.slice(1, 5).map((post: any) => (
         <div class="flex items-baseline justify-between px-7 py-5 border-b border-white/[0.07] cursor-pointer hover:bg-white/2">
           <div class="flex flex-col gap-1.5">
             <span class="yap:h3 mt-4!  text-mauve-100">{post.data.title}</span>

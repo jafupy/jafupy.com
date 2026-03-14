@@ -40,7 +40,7 @@ const randoms = letters.map((letter, i) => {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{title} | V2b</title>
+    <title>{title}</title>
     <link rel="icon" href="/favicon.png" />
   </head>
   <body class="bg-mauve-900 text-mauve-50 p-8 pb-0 relative min-h-screen">
@@ -106,6 +106,20 @@ const randoms = letters.map((letter, i) => {
 
   let h1 = document.querySelector("h1#wordmark")! as HTMLElement;
   let content = document.querySelector("div#content")! as HTMLElement;
+  const shader = document.querySelector("dither-shader")! as HTMLElement & {
+    seed: number;
+  };
+
+  let t = 0;
+  let last = performance.now();
+  function animate() {
+    const now = performance.now();
+    const dt = now - last; // milliseconds since last frame
+    last = now;
+    shader.seed = (shader.seed + dt * 5e-10) % 1; // slower, smooth, frame-rate safe
+    requestAnimationFrame(animate);
+  }
+  animate();
 
   type EasingFunction = (t: number) => number;
 
