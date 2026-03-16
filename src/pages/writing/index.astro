@@ -1,5 +1,6 @@
 ---
 import Root from "$/layouts/minimal.astro";
+import { format } from "$/lib/date";
 import { GithubIcon, MailOpenIcon, TwitterIcon } from "@lucide/svelte";
 
 import { getCollection } from "astro:content";
@@ -24,23 +25,7 @@ const posts = (await getCollection("blog")).sort(
             <span class="text-sm text-mauve-400">{post.data.description}</span>
           </div>
           <span class="font-mono text-xs text-mauve-400 whitespace-nowrap">
-            {
-              [
-                "Jan",
-                "Feb",
-                "Mar",
-                "Apr",
-                "May",
-                "Jun",
-                "Jul",
-                "Aug",
-                "Sep",
-                "Oct",
-                "Nov",
-                "Dec",
-              ][post.data.date.getMonth()]
-            }{" "}
-            {post.data.date.getFullYear()}
+            {format(post.data.date)}
           </span>
         </a>
       ))

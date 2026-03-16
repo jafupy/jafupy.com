@@ -2,11 +2,22 @@
 import { getCollection, render } from "astro:content";
 import Root from "$/layouts/minimal.astro";
 
+export const prerender = true;
+
 export async function getStaticPaths() {
   const posts = await getCollection("blog");
+  // console.log(
+  //   posts.map((post) => ({
+  //     params: {
+  //       slug: post.id,
+  //       year: new Date(post.data.date).getFullYear().toString(),
+  //     },
+  //     // props: post,
+  //   })),
+  // );
   return posts.map((post) => ({
     params: {
-      slug: post.id,
+      slug: post.id.split("/").pop(),
       year: new Date(post.data.date).getFullYear().toString(),
     },
     props: post,
@@ -15,6 +26,8 @@ export async function getStaticPaths() {
 
 const post = Astro.props;
 const { Content } = await render(post);
+
+console.log(post);
 ---
 
 <Root title={post.data.title}>

@@ -135,6 +135,12 @@ class DitherShader extends HTMLElement {
     });
     this._ro.observe(this);
 
+    this._onVisibility = () => {
+      if (document.hidden) this._stopLoop();
+      else if (this.hasAttribute("animate")) this._startLoop();
+    };
+    document.addEventListener("visibilitychange", this._onVisibility);
+
     if (this.hasAttribute("animate")) this._startLoop();
     else this._schedule();
   }
@@ -142,13 +148,14 @@ class DitherShader extends HTMLElement {
   disconnectedCallback() {
     this._ro?.disconnect();
     this._stopLoop();
+    document.removeEventListener("visibilitychange", this._onVisibility);
   }
 
   attributeChangedCallback(name) {
     if (name === "color" || name === "background") this._colorsDirty = true;
 
     if (name === "animate") {
-      this.hasAttribute("animate") ? this._startLoop() : this._stopStop();
+      this.hasAttribute("animate") ? this._startLoop() : this._stopLoop();
       return;
     }
 
