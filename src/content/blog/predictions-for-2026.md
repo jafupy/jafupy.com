@@ -1,7 +1,7 @@
 ---
 title: Predictions for 2026
 date: 2025 12 31
-description: I try guess what will happen in 2026. OpenAI goes public, Anthropic gets acquired, Apples catches up in AI, Windows looses marketshare and GPT 6 is a massive upgrade. Also I try predict my GCSE results.
+description: I try to guess what will happen in 2026. OpenAI goes public, Anthropic gets acquired, Apple catches up in AI, Windows loses market share, and GPT-6 is a massive upgrade. I also predict my GCSE results.
 ---
 
 Every year people try to guess what will happen next year in tech, and almost everyone is wrong. But it's fun so here are my predictions for 2026, and why I think they will happen. 
@@ -10,17 +10,17 @@ But first, ~~a message from my sponsor~~ a blast from the past. Venturing deep i
 
 ## Predictions for 2024
 
-First, lets point and laugh and my incorrect predictions:
+First, let's point and laugh at my incorrect predictions:
 
 - Temu gets shut down
 - Other companies will copy Apple and make their own AR/VR headsets
 Temu didn't get shut down and the Apple Vision Pro didn't influence the Meta Quest or anything else.
 Now, for the partially right:
-- Windows for arm will take off
+- Windows for Arm will take off
 - Disney becomes less progressive
 
-While the introduction of Qualcomm chips in laptops improved the windows for Arm situation, the arm laptops didn't sell very well. And whether Disney became less wokeprogressive that's subjective, and I don't really follow their movies any more. But in Elio, they forced any sort of LGBT and finding out your identity themes that were originally going to be there out, delaying the movie by a year. :shrug:
-Now, for what. I got correct. Are you proud of me yet mom?
+While the introduction of Qualcomm chips in laptops improved the Windows for Arm situation, the Arm laptops didn't sell very well. And whether Disney became less progressive is subjective, and I don't really follow their movies anymore. But in Elio, they forced out any LGBT or identity themes that were originally going to be there, delaying the movie by a year. :shrug:
+Now, for what I got correct. Are you proud of me yet, mom?
 
 - iOS 18 will bring a redesign. Not a massive one, just a smaller one
 - Apple's Vision Pro will have a small user base
@@ -63,11 +63,7 @@ Anthropic also has Claude Code, which Apple could integrate into Xcode to make i
 
 Carrying on with Apple's expansion into AI, I think they will reposition the Mac Pro, a neglected product that has been superseded by the Mac Studio, and turn it into a local AI powerhouse. I think It will have 2 M5 ultras, and RAM upgrades up to at least 1.5TB. This would mean that thanks to the unified memory architecture, the bottleneck of AI, RAM, will become basically negligible. 
 
-### Windows Loses Significant Marketshare
 
-Windows 11 sucks. Its filled with bloat, and AI slop and is generally a horrible experience. Windows 10 is reaching end of life, so many people are leaving that as well because of the security concerns. Therefore people don't want to use Windows, so when they upgrade their machines, I think many of them will choose either Linux, or more likely MacBooks with MacOS. As of November 2025 Windows has 70% marketshare, MacOS has 13% and Linux has 3. I think Mac will get closer to 20%, and Linux will reach 5%, if not 10. Then Chromebooks & unknown are whatever.
-
-[OS Marketshare for Nov 25](https://gs.statcounter.com/os-market-share/desktop/worldwide/#monthly-202411-202511-map)
 
 ### GPT-6 Will Be a Massive Breakthrough
 
