@@ -1,118 +1,185 @@
 <script>
-  import { Portal, Command } from "bits-ui";
+  import { onMount, tick } from "svelte";
+  import { Portal } from "bits-ui";
+  import * as Command from "./command/index.ts";
   import { swapper } from "./swapper.svelte.ts";
   import { engine } from "./search.svelte.ts";
-  import { CommandIcon, SearchIcon, XIcon } from "@lucide/svelte";
-  import { format } from "../date.ts";
+  import { CmdkController } from "./controller.svelte.ts";
+  import { SearchIcon, XIcon } from "@lucide/svelte";
   import Result from "./result.svelte";
 
-  export function onKeydown(e) {
-    if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-      e.preventDefault();
-      toggle();
+  const controller = new CmdkController();
+  let resultsEl = $state(null);
+  let stylesReady = $state(false);
+
+  onMount(() => {
+    controller.attach();
+    return () => controller.destroy();
+  });
+
+  $effect(() => {
+    engine.results.length;
+    engine.areWeTagging;
+    engine.activeFilters.length;
+    controller.syncResultsLayout();
+  });
+
+  $effect(() => {
+    swapper.open;
+    controller.setResultsElement(resultsEl);
+    return controller.observeResults();
+  });
+
+  $effect(() => {
+    if (!swapper.open) {
+      stylesReady = false;
+      return;
     }
-    if (e.key === "Escape" && swapper.open) close();
-  }
 
-  let scrollPosition = $state(-1);
+    stylesReady = false;
+    let cancelled = false;
 
-  async function open() {
-    scrollPosition = window.scrollY;
-    swapper.toggle(true);
-    await engine.init();
-    engine.setQuery("");
-  }
+    tick().then(() => {
+      requestAnimationFrame(() => {
+        if (!cancelled) stylesReady = true;
+      });
+    });
 
-  function close() {
-    swapper.toggle(false);
-    engine.reset();
-    if (scrollPosition < 0) return;
-    window.scrollTo({ top: scrollPosition });
-    scrollPosition = -1;
-  }
-
-  function toggle() {
-    if (swapper.open) close();
-    else open();
-  }
+    return () => {
+      cancelled = true;
+    };
+  });
 </script>
 
-<svelte:window onkeydown={onKeydown} />
+<svelte:window onkeydown={controller.handleGlobalKeydown} />
 
 {#if swapper.open}
-  <Command.Root>
+  <Command.Root
+    results={() => engine.results}
+    onConfirm={controller.onConfirm}
+    onEscape={controller.close}
+  >
     <Portal to="nav">
-      <div class="w-full h-full flex flex-col">
-        <div class="flex items-center gap-2.5 px-5 py-3.5">
-          <SearchIcon class="size-4 text-mauve-400 shrink-0" />
-          <input
+      <div class="cmdk-shell flex h-full w-full flex-col">
+        <div class="flex items-center gap-2.5 px-5 pr-3.5 py-3.5">
+          <SearchIcon class="size-4 shrink-0 text-mauve-400" />
+          <Command.Input
             value={engine.query}
-            oninput={(e) => engine.setQuery(e.currentTarget.value)}
-            class="flex-1 bg-transparent text-base text-white/80 placeholder:text-mauve-400 border-0 focus:outline-none"
+            onInput={(value) => engine.setQuery(value)}
+            class="flex-1 border-0 bg-transparent text-base text-white/80 placeholder:text-mauve-400 focus:outline-none md:text-sm"
             placeholder="Search or type : to filter"
-            autofocus
           />
-          <kbd
-            class="text-xs text-mauve-400 font-mono tracking-wide flex items-center"
+          <button
+            onclick={controller.close}
+            aria-label="Close search"
+            class="h-full aspect-square"
           >
-            <CommandIcon class="size-3 inline mr-0.5" />K
-          </kbd>
+            <XIcon
+              class="size-4 text-mauve-400 hover:text-white transition-colors"
+            />
+          </button>
         </div>
       </div>
-      <!-- {#if engine.activeFilters.length > 0} -->
+
       <div
-        class="absolute inset-x-4 bottom-0 translate-y-3/4 flex items-center gap-1.5 p-0"
+        class="cmdk-chip-row absolute inset-x-4 bottom-0 flex translate-y-3/4 items-center gap-1.5"
       >
-        {#each engine.activeFilters as filter}
-          <button
-            onclick={() => engine.removeFilter(filter.value)}
-            class="flex items-center gap-1 text-sm px-3 py-1 rounded-lg bg-mauve-800 border border-white/10 text-mauve-200 hover:text-mauve-100 hover:border-white/20 transition-colors"
-          >
-            {filter.value}
-            <XIcon class="size-3" />
-          </button>
-        {/each}
-        <button
-          class="flex items-center gap-1 text-sm px-3 py-1 rounded-lg bg-mauve-800 border border-white/10 text-mauve-200 hover:text-mauve-100 hover:border-white/20 transition-colors"
-        >
-          Testing
-          <XIcon class="size-3" />
-        </button>
+        <div class="cmdk-chip-row-inner flex items-center gap-1.5">
+          {#if engine.activeFilters.length > 0}
+            {#each engine.activeFilters as filter}
+              <button
+                onclick={() => engine.removeFilter(filter.id)}
+                class="flex items-center gap-1 rounded-lg border border-mauve-100/20 bg-mauve-800 px-3 py-1 font-mono text-xs transition-colors hover:border-mauve-100/20"
+              >
+                {filter.label}
+                <XIcon class="size-3" />
+              </button>
+            {/each}
+          {/if}
+        </div>
       </div>
-      <!-- {/if} -->
     </Portal>
 
     <Portal to="#content">
-      <Command.List
-        class="rounded-t-2xl bg-white/5 border-[0.5px] border-white/13 border-b-0 backdrop-blur-xl overflow-y-scroll"
-      >
-        {#each engine.results as result}
-          <Result {engine} {result} />
-        {/each}
+      <Command.List>
+        <div bind:this={resultsEl} data-cmdk-results class="content-bg">
+          <div
+            class="flex h-10 items-center justify-between border-b border-mauve-100/20 px-7 font-mono text-xs uppercase tracking-widest text-mauve-400"
+          >
+            <span>{engine.areWeTagging ? "Filters" : "Results"}</span>
+            <span>{engine.results.length}</span>
+          </div>
+
+          {#if engine.results.length > 0}
+            <div>
+              {#each engine.results as result, i (engine.resultKey(result, i))}
+                <Command.Item
+                  index={i}
+                  class="cursor-pointer border-b border-mauve-100/20 transition-colors last:border-b-0"
+                >
+                  {#snippet children(selected)}
+                    <Result
+                      {result}
+                      {selected}
+                      active={stylesReady &&
+                        result.type === "filter" &&
+                        engine.activeFilters.some(
+                          (filter) => filter.id === result.filterId,
+                        )}
+                    />
+                  {/snippet}
+                </Command.Item>
+              {/each}
+              <div class="h-8"></div>
+            </div>
+          {:else}
+            <div class="px-7 py-8">
+              <p class="font-serif text-2xl">Nothing here yet</p>
+              <p class="mt-2 max-w-lg text-sm leading-relaxed text-mauve-400">
+                {engine.areWeTagging
+                  ? "Try another filter name, or clear the leading colon to search everything."
+                  : "Try a broader query, or type : to filter by year and content type."}
+              </p>
+            </div>
+          {/if}
+        </div>
       </Command.List>
     </Portal>
   </Command.Root>
 {/if}
 
 <style>
+  :global(nav) {
+    position: relative;
+  }
   :global(nav.searching) {
     padding: 0;
-    width: var(--container-lg);
+    width: min(
+      var(--container-lg),
+      calc(min(100vw, var(--spacing-ch-md)) - 4rem)
+    );
     position: relative;
     overflow: visible;
     border-radius: var(--radius-xl);
   }
-  :global(#content.searching) {
-    margin-top: 0 !important;
-    position: fixed;
-    bottom: 0;
-    top: 33vh;
-    left: 0;
-    right: 0;
-    overflow-y: scroll;
+  :global(nav.searching #nav_default) {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
   }
-  :global(body:has(.searching) h1#wordmark) {
-    filter: blur(15px) !important;
-    opacity: 0.3 !important;
+  :global(#content) {
+    position: relative;
+  }
+  :global(#content.searching > [data-page-content]) {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  :global(#content.searching [data-cmdk-results]) {
+    position: absolute;
+    inset-inline: 0;
+    top: 0;
   }
 </style>

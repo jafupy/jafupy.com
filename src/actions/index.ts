@@ -2,21 +2,62 @@ import { defineAction } from "astro:actions";
 import { z } from "astro/zod";
 import { getCollection } from "astro:content";
 import Fuse from "fuse.js";
-import type { Filter, SearchResult } from "$/lib/cmdk/search.svelte";
+import type {
+  Filter,
+  PageResult,
+  ProjectResult,
+  WritingResult,
+  SearchResult,
+  SocialResult,
+  ActionResult,
+} from "$/lib/cmdk/search.svelte";
+import { projects } from "$/projects";
 
-const STATIC_ITEMS: SearchResult[] = [
+type SearchableResult = SearchResult & {
+  body?: string;
+  year?: string;
+};
+
+type SearchableWritingResult = WritingResult & {
+  body?: string;
+  year: string;
+};
+
+type SearchableProjectResult = ProjectResult & {
+  body?: string;
+};
+
+function toFilterId(type: Filter["type"], value: string) {
+  return `${type}:${value}`;
+}
+
+const STATIC_ITEMS: (PageResult | ActionResult | SocialResult)[] = [
   { type: "page", title: "Home", href: "/" },
   { type: "page", title: "Writing", href: "/writing" },
-  { type: "page", title: "About", href: "/about" },
-  { type: "action", title: "Copy email", description: "jacob@jafupy.com" },
+  { type: "page", title: "Projects", href: "/projects" },
+  {
+    type: "action",
+    title: "Copy email",
+    description: "hello@jafupy.com",
+    actionId: "copy-email",
+  },
   { type: "social", title: "GitHub", href: "https://github.com/jafupy" },
-  { type: "social", title: "Twitter", href: "https://twitter.com/jafupy" },
+  { type: "social", title: "Twitter", href: "https://x.com/jafupy" },
 ];
 
-async function getPosts(): Promise<SearchResult[]> {
+function compareAlphabetically(
+  a: Pick<SearchResult, "title">,
+  b: Pick<SearchResult, "title">,
+) {
+  return a.title.localeCompare(b.title, undefined, {
+    sensitivity: "base",
+  });
+}
+
+async function getPosts(): Promise<SearchableWritingResult[]> {
   const posts = await getCollection("blog");
   return posts.map((p) => ({
-    type: "post" as const,
+    type: "writing",
     title: p.data.title,
     description: p.data.description,
     slug: p.id,
@@ -26,10 +67,36 @@ async function getPosts(): Promise<SearchResult[]> {
   }));
 }
 
+async function getProjects(): Promise<SearchableProjectResult[]> {
+  return projects.map((project) => ({
+    type: "project",
+    title: project.title,
+    description: project.description,
+    href: project.href,
+  }));
+}
+
+async function getTagFilters(): Promise<Filter[]> {
+  const tags = await getCollection("cmdkTags");
+
+  return tags
+    .map((tag) => ({
+      id: toFilterId(tag.data.type, tag.data.value),
+      type: tag.data.type,
+      value: tag.data.value,
+      label: tag.data.label,
+      aliases: tag.data.aliases,
+      order: tag.data.order,
+    }))
+    .sort((a, b) => a.order - b.order)
+    .map(({ order: _, ...filter }) => filter);
+}
+
 export const server = {
   getFilters: defineAction({
     async handler() {
       const posts = await getCollection("blog");
+      const tags = await getTagFilters();
       const years = [
         ...new Set(posts.map((p) => p.data.date.getFullYear().toString())),
       ]
@@ -37,11 +104,13 @@ export const server = {
         .reverse();
 
       const filters: Filter[] = [
-        { type: "type", value: "post" },
-        { type: "type", value: "page" },
-        { type: "type", value: "action" },
-        { type: "type", value: "social" },
-        ...years.map((y) => ({ type: "year" as const, value: y })),
+        ...tags,
+        ...years.map((year) => ({
+          id: toFilterId("year", year),
+          type: "year" as const,
+          value: year,
+          label: year,
+        })),
       ];
 
       return filters;
@@ -60,33 +129,36 @@ export const server = {
     }),
     async handler({ query, filters }) {
       const posts = await getPosts();
-      const all: (SearchResult & { year?: string; body?: string })[] = [
-        ...posts,
-        ...STATIC_ITEMS,
-      ];
+      const projects = await getProjects();
+      const all: SearchableResult[] = [...posts, ...projects, ...STATIC_ITEMS];
+      const filterGroups = filters.reduce((groups, filter) => {
+        const values = groups.get(filter.type) ?? new Set<string>();
+        values.add(filter.value);
+        groups.set(filter.type, values);
+        return groups;
+      }, new Map<Filter["type"], Set<string>>());
 
-      // apply active filters
-      const yearFilters = filters
-        .filter((f) => f.type === "year")
-        .map((f) => f.value);
-      const typeFilters = filters
-        .filter((f) => f.type === "type")
-        .map((f) => f.value);
+      const filtered = all.filter((item) => {
+        for (const [filterType, values] of filterGroups) {
+          if (filterType === "type" && !values.has(item.type)) {
+            return false;
+          }
 
-      let filtered = all.filter((item) => {
-        if (yearFilters.length > 0) {
-          if (item.type !== "post") return false;
-          if (!yearFilters.includes((item as any).year)) return false;
+          if (filterType === "year") {
+            if (item.type !== "writing") return false;
+            if (!item.year || !values.has(item.year)) return false;
+          }
         }
-        if (typeFilters.length > 0) {
-          if (!typeFilters.includes(item.type)) return false;
-        }
+
         return true;
       });
 
-      // if no query, return filtered list sorted by date desc
+      // if no query, return the filtered list alphabetically
       if (!query.trim()) {
-        return filtered.map(({ body: _, year: __, ...rest }) => rest);
+        return filtered
+          .slice()
+          .sort(compareAlphabetically)
+          .map(({ body: _, year: __, ...rest }) => rest);
       }
 
       // fuse search over filtered set
@@ -102,6 +174,10 @@ export const server = {
 
       return fuse
         .search(query)
+        .sort((a, b) => {
+          const scoreDiff = (a.score ?? 1) - (b.score ?? 1);
+          return scoreDiff || compareAlphabetically(a.item, b.item);
+        })
         .map((r) => r.item)
         .map(({ body: _, year: __, ...rest }) => rest);
     },

@@ -1,0 +1,7 @@
+{
+  "label": "Social",
+  "type": "type",
+  "value": "social",
+  "aliases": ["socials"],
+  "order": 40
+}

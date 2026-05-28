@@ -1,0 +1,7 @@
+{
+  "label": "Action",
+  "type": "type",
+  "value": "action",
+  "aliases": ["actions"],
+  "order": 30
+}

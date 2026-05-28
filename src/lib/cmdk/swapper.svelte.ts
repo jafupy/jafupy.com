@@ -1,48 +1,22 @@
-// swapper.svelte.js
 export class Swapper {
   #open = $state(false);
-  #fragments = new Map();
 
   get open() {
     return this.#open;
   }
 
   toggle(force: boolean | "AUTO" = "AUTO") {
-    if (force === "AUTO") {
-      this.#open ? this.#close() : this.#open_();
-      return;
-    }
-    if (force) {
-      if (this.#open) return;
-      this.#open_();
-    } else {
-      if (!this.#open) return; // already closed
-      this.#close();
-    }
-  }
+    const next = force === "AUTO" ? !this.#open : force;
 
-  #open_() {
-    for (const [selector] of this.#targets()) {
-      const el = document.querySelector(selector)!;
-      const frag = document.createDocumentFragment();
-      while (el.firstChild) frag.appendChild(el.firstChild);
-      this.#fragments.set(selector, frag);
-      el.classList.add("searching");
-    }
-    this.#open = true;
-  }
+    if (next === this.#open) return;
 
-  #close() {
-    for (const [selector, frag] of this.#fragments) {
-      document.querySelector(selector).appendChild(frag);
-      document.querySelector(selector).classList.remove("searching");
-    }
-    this.#fragments.clear();
-    this.#open = false;
-  }
+    this.#open = next;
 
-  #targets() {
-    return [["nav"], ["#content"]];
+    for (const selector of ["nav", "#content"]) {
+      const el = document.querySelector(selector);
+      if (!el) continue;
+      el.classList.toggle("searching", next);
+    }
   }
 }
 
