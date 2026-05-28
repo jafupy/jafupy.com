@@ -1,8 +1,9 @@
 <script lang="ts">
-  import { SplitText } from "gsap/SplitText.js";
+  import { gsap } from "gsap";
   import type { Snippet } from "svelte";
-  import { createGsapAttachment } from "$/lib/util";
+  import { tick } from "svelte";
   import { getTelescopeContext } from "./telescope-context.svelte";
+  import { splitOwnText, type TextSplit } from "./text-split";
 
   type Props = {
     children: Snippet;
@@ -13,49 +14,57 @@
 
   const telescope = getTelescopeContext();
 
-  const revealText = createGsapAttachment((node, _value, { gsap }) => {
-    gsap.registerPlugin(SplitText);
+  function revealText(node: HTMLElement) {
+    let cancelled = false;
+    let split: TextSplit | null = null;
+    let tween: gsap.core.Tween | null = null;
 
-    const split = SplitText.create(node, {
-      type: "words,chars",
-      reduceWhiteSpace: false,
-      wordsClass: "inline-block whitespace-nowrap",
-      charsClass: "inline-block will-change-[transform,opacity,filter]",
+    tick().then(() => {
+      if (cancelled || !node.isConnected) return;
+
+      split = splitOwnText(node);
+
+      if (!split.chars.length) return;
+
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        gsap.set(split.chars, { clearProps: "all" });
+        split.revert();
+        split = null;
+        return;
+      }
+
+      tween = gsap.fromTo(
+        split.chars,
+        {
+          y: "0.45em",
+          opacity: 0,
+          filter: "blur(5px)",
+        },
+        {
+          y: 0,
+          opacity: 1,
+          filter: "blur(0px)",
+          duration: 0.34,
+          ease: "power3.out",
+          stagger: 0.006,
+          clearProps: "transform,opacity,filter",
+        },
+      );
     });
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      gsap.set(split.chars, { clearProps: "all" });
-      return () => split.revert();
-    }
-
-    const tween = gsap.fromTo(
-      split.chars,
-      {
-        y: "0.45em",
-        opacity: 0,
-        filter: "blur(5px)",
+    return {
+      destroy() {
+        cancelled = true;
+        tween?.kill();
+        split?.revert();
       },
-      {
-        y: 0,
-        opacity: 1,
-        filter: "blur(0px)",
-        duration: 0.34,
-        ease: "power3.out",
-        stagger: 0.006,
-        clearProps: "transform,opacity,filter",
-      },
-    );
-
-    return () => {
-      tween.kill();
-      split.revert();
     };
-  });
+  }
 </script>
 
 {#if telescope.getOpen()}
   <span
-    {@attach revealText}
+    use:revealText
     class={[
       "inline whitespace-pre-wrap",
       className,

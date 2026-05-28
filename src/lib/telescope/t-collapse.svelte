@@ -1,8 +1,9 @@
 <script lang="ts">
   import { gsap } from "gsap";
-  import { SplitText } from "gsap/SplitText.js";
   import type { Snippet } from "svelte";
+  import { tick } from "svelte";
   import { getTelescopeContext } from "./telescope-context.svelte";
+  import { splitOwnText, type TextSplit } from "./text-split";
 
   type Props = {
     children: Snippet;
@@ -13,12 +14,10 @@
 
   const telescope = getTelescopeContext();
 
-  gsap.registerPlugin(SplitText);
-
   let node: HTMLSpanElement;
   let visible = $state(!telescope.getOpen());
   let tween: gsap.core.Tween | null = null;
-  let split: SplitText | null = null;
+  let split: TextSplit | null = null;
 
   $effect(() => {
     const open = telescope.getOpen();
@@ -32,17 +31,29 @@
       split?.revert();
       tween = null;
       split = null;
+      clearInlineAnimationStyles(node);
       visible = true;
     }
 
     return () => {
       tween?.kill();
       split?.revert();
+      if (node) clearInlineAnimationStyles(node);
     };
   });
 
-  function animateOut(node: HTMLElement) {
+  function clearInlineAnimationStyles(node: HTMLElement) {
+    node.style.position = "";
+    node.style.width = "";
+    node.style.pointerEvents = "";
+    node.style.zIndex = "";
+  }
+
+  async function animateOut(node: HTMLElement) {
     if (!visible || tween) return;
+
+    await tick();
+    if (!visible || tween || !node.isConnected) return;
 
     const rect = node.getBoundingClientRect();
 
@@ -51,16 +62,21 @@
     node.style.pointerEvents = "none";
     node.style.zIndex = "1";
 
-    split = SplitText.create(node, {
-      type: "words,chars",
-      reduceWhiteSpace: false,
-      wordsClass: "inline-block whitespace-nowrap",
-      charsClass: "inline-block will-change-[transform,opacity,filter]",
-    });
+    split = splitOwnText(node);
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (!split.chars.length) {
       split.revert();
       split = null;
+      clearInlineAnimationStyles(node);
+      visible = false;
+      return;
+    }
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      gsap.set(split.chars, { clearProps: "all" });
+      split.revert();
+      split = null;
+      clearInlineAnimationStyles(node);
       visible = false;
       return;
     }
@@ -83,6 +99,7 @@
           split?.revert();
           split = null;
           tween = null;
+          clearInlineAnimationStyles(node);
           visible = false;
         },
       },

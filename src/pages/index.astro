@@ -16,24 +16,6 @@ const allPosts = (await getCollection("blog")).sort(
 const posts = allPosts.slice(0, 4);
 
 const latest = posts[0];
-const featuredOptions = [
-  ...allPosts.map((post) => ({
-    title: post.data.title,
-    description: post.data.description,
-    href: `/writing/${post.data.date.getFullYear()}/${post.id}`,
-    meta: format(post.data.date),
-    cta: "Read",
-    kind: "writing",
-  })),
-  ...projects.map((project) => ({
-    title: project.title,
-    description: project.description,
-    href: project.href,
-    meta: "Emulator",
-    cta: "Play",
-    kind: "game",
-  })),
-];
 ---
 
 <Root
@@ -44,11 +26,6 @@ const featuredOptions = [
     <!-- Blurb + Socials -->
     <div class="px-7 py-6 ">
       <Blurb client:load/>
-      <p class="leading-relaxed mb-5">
-        I'm <span class="text-old-rose">Jacob</span>, <span
-          class="text-old-rose">16</span
-        >, from <span class="text-old-rose">southern England</span>. I do stuff.
-      </p>
       <div class="flex items-center gap-6 flex-wrap">
         <a
           href="https://github.com/jafupy"
@@ -74,44 +51,34 @@ const featuredOptions = [
     <!-- Featured — bleeds 1rem past card edges -->
     <div
       class="-mx-4 cursor-pointer group"
-      data-featured-card
-      data-featured-options={JSON.stringify(featuredOptions)}
     >
       <a
-        data-featured-link
         href={`/writing/${latest.data.date.getFullYear()}/${latest.id}`}
         class="p-5 flex flex-col border border-mauve-100/20 rounded-xl bg-mauve-800"
       >
         <div
-          data-featured-item
           class="font-mono text-xs tracking-widest uppercase text-mauve-400 mb-3"
         >
-          featured
+          latest yappery/tangent/ragebait/"blog post"
         </div>
         <h2
-          data-featured-title
-          data-featured-item
           class="font-serif text-2xl leading-snug mb-3 group-hover:text-white transition-colors"
         >
           {latest.data.title}
         </h2>
         <p
-          data-featured-description
-          data-featured-item
           class="text-mauve-400 text-sm leading-relaxed mb-4"
         >
           {latest.data.description}
         </p>
-        <div data-featured-item class="w-full flex items-center gap-2.5 pt-1">
+        <div class="w-full flex items-center gap-2.5 pt-1">
           <span
-            data-featured-meta
             class="font-mono text-xs text-mauve-400 whitespace-nowrap"
           >
             {format(latest.data.date)}
           </span>
           <Divider />
           <span
-            data-featured-cta
             class="inline-flex items-center gap-2 font-mono text-xs text-mauve-400 transition-colors group-hover:text-mauve-300"
           >
             Read

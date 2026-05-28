@@ -31,6 +31,7 @@
 </script>
 
 <span
+  data-telescope-root=""
   class={[
     "inline",
     "group/telescope",

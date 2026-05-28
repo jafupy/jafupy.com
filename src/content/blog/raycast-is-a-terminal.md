@@ -1,5 +1,5 @@
 ---
-title: Raycast is a terminal
+title: Raycast is a Terminal
 date: 2026 05 28
 tags:
 description: Raycast is just a terminal with a nice coat of paint. Type a command, get output. Same thing, prettier result. It even runs bash scripts.
@@ -15,4 +15,4 @@ If you still don't believe me, Raycast supports bash scripts as commands. So it'
 
 That's Raycast. Or is it a terminal? Why not both? They're the same thing anyways.
 
-Thank you. 
+Thank you.
