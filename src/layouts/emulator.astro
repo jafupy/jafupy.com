@@ -1,0 +1,31 @@
+---
+import "@fontsource-variable/bricolage-grotesque";
+import "@fontsource-variable/jetbrains-mono";
+import "@fontsource-variable/brygada-1918";
+import "$/styles/global.css";
+
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+
+const pageTitle = `${title} | Jafu.py`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{pageTitle}</title>
+    <meta name="theme-color" content="#14121a" />
+    <link rel="icon" href="/favicon.png" />
+  </head>
+  <body
+    class="bg-mauve-900 text-mauve-200 m-0 overflow-hidden h-dvh w-dvw grid place-items-center"
+  >
+    <main class="fixed inset-0">
+      <slot />
+    </main>
+  </body>
+</html>
