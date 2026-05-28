@@ -1,0 +1,448 @@
+---
+import { existsSync } from "node:fs";
+import "@fontsource-variable/bricolage-grotesque";
+import "@fontsource-variable/jetbrains-mono";
+import "@fontsource-variable/brygada-1918";
+import { CommandIcon, ExternalLinkIcon } from "@lucide/svelte";
+
+import "$/styles/global.css";
+
+import Cmdk from "$/lib/cmdk/component.svelte";
+import Divider from "$/lib/divider.svelte";
+import Hud from "$/lib/hud/hud.svelte";
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogType?: "website" | "article";
+  publishedTime?: string;
+  modifiedTime?: string;
+  socialImage?: string;
+}
+
+const {
+  title,
+  description,
+  ogType,
+  publishedTime,
+  modifiedTime,
+  socialImage: providedSocialImage,
+}: Props = {
+  title: "Jafu.py",
+  description:
+    "Personal site of Jacob: writing, software projects, experiments, and notes from southern England.",
+  ogType: "website",
+  ...(Astro.props as Props),
+};
+
+const site = import.meta.env.DEV
+  ? Astro.url.origin
+  : Astro.site ?? new URL("https://jafupy.com");
+
+const canonical = new URL(Astro.url.pathname, site);
+
+const fallbackSocialImagePath = "/ogp.png";
+
+function getInferredWritingOgPath() {
+  const match = Astro.url.pathname.match(/^\/writing\/(\d{4})\/([^/]+)\/?$/);
+  if (!match) return null;
+
+  const [, year, slug] = match;
+  return `/og/writing/${year}/${slug}.png`;
+}
+
+function publicFileExists(publicPath: string) {
+  const file = new URL(`../../public${publicPath}`, import.meta.url);
+  return existsSync(file);
+}
+
+const inferredSocialImagePath = getInferredWritingOgPath();
+
+const socialImagePath =
+  providedSocialImage ??
+  (inferredSocialImagePath && publicFileExists(inferredSocialImagePath)
+    ? inferredSocialImagePath
+    : fallbackSocialImagePath);
+
+const socialImage = new URL(socialImagePath, site);
+
+const pageTitle = title === "Jafu.py" ? title : `${title} | Jafu.py`;
+
+const jsonLd =
+  ogType === "article"
+    ? {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        headline: title,
+        description,
+        url: canonical.toString(),
+        image: socialImage.toString(),
+        datePublished: publishedTime,
+        dateModified: modifiedTime ?? publishedTime,
+        author: {
+          "@type": "Person",
+          name: "Jacob",
+          url: site.toString(),
+        },
+        publisher: {
+          "@type": "Person",
+          name: "Jacob",
+          url: site.toString(),
+        },
+      }
+    : {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        name: "Jafu.py",
+        url: site.toString(),
+        description,
+        author: {
+          "@type": "Person",
+          name: "Jacob",
+          url: site.toString(),
+        },
+      };
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content="index,follow" />
+    <meta name="author" content="Jacob" />
+    <meta name="theme-color" content="#14121a" />
+    <link rel="canonical" href={canonical.toString()} />
+    <link rel="icon" href="/favicon.png" />
+    <meta property="og:site_name" content="Jafu.py" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical.toString()} />
+    <meta property="og:image" content={socialImage.toString()} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImage.toString()} />
+    <meta name="twitter:creator" content="@jafupy" />
+    {
+      publishedTime && (
+        <meta property="article:published_time" content={publishedTime} />
+      )
+    }
+    {
+      modifiedTime && (
+        <meta property="article:modified_time" content={modifiedTime} />
+      )
+    }
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  </head>
+  <body class="bg-mauve-900 text-mauve-200 p-8 pb-0 relative min-h-screen">
+    <header class="fixed top-6 left-1/2 -translate-x-1/2 z-50000 flex">
+      <nav
+        class="flex w-fit gap-4 px-4 pr-2 py-2 rounded-xl border border-mauve-100/20 backdrop-blur-md transition-colors bg-mauve-800/20 text-sm items-center justify-center"
+      >
+        <div id="nav_default" class="nav-default flex items-center gap-4">
+          <a
+            href="/"
+            class="group flex items-center justify-center gap-1.5 hover:text-old-rose transition-colors"
+          >
+            Jafu.py
+            <span class="sr-only">Home</span>
+          </a>
+          <a href="/writing" class="hover:text-old-rose transition-colors"
+            >Writing</a
+          >
+          <a
+            href="mailto:hello@jafupy.com"
+            class="group relative hover:text-old-rose transition-colors flex items-center justify-center gap-2"
+            >Contact
+            <ExternalLinkIcon class="size-3.75 not-sm:hidden" />
+            <span
+              id="contact_tooltip"
+              class="invisible select-text pointer-events-auto not-group-hover:delay-200 overflow-visible group-hover:visible absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-mauve-900 text-sm px-4 py-1.5 rounded-lg border border-mauve-100/10 whitespace-nowrap before:content-[''] before:absolute before:bottom-full before:translate-y-1/2 before:-z-2 before:left-1/2 before:-translate-x-1/2 before:border-l before:border-t before:border-mauve-100/10 before:bg-mauve-900 before:rounded-tl-xs before:size-2 before:rotate-45"
+            >
+              hello@jafupy.com
+            </span>
+          </a>
+          <Divider class="not-sm:hidden" />
+          <button
+            id="cmdk_trigger"
+            type="button"
+            class="flex items-center gap-1 text-xs p-1 px-3 rounded-md border border-mauve-100/20 bg-mauve-800 transition-colors hover:bg-mauve-900 hover:border-mauve-100/20"
+          >
+            <CommandIcon class="size-3 transition-colors" />
+            <span class="transition-colors">K</span>
+          </button>
+        </div>
+      </nav>
+    </header>
+
+    <h1
+      id="wordmark"
+      class="font-serif text-mauve-50 fixed left-1/2 -translate-x-1/2 -translate-y-3/5 leading-none -z-1 font-semibold max-w-[max(calc(100vw-16rem),80vw)] w-full text-center"
+    >
+      {title}
+    </h1>
+    <div
+      id="fade"
+      class="fixed inset-0 -z-1 bg-[radial-gradient(transparent_25%,var(--color-mauve-900)_25%)] bg-size-[4px_4px]"
+    >
+    </div>
+    <div id="content" class="max-w-ch-md mx-auto p-0">
+      <slot />
+    </div>
+
+    <dither-shader
+      halftone="100"
+      color="#cb8b8c68"
+      brightness="-0.5"
+      mode="noise"
+      dot-size="3"
+      rotation="32"
+      jitter="0.8"
+      warp="50"
+      blue-noise="0.45"
+      animate="false"
+      class="fixed! opacity-70"></dither-shader>
+    <Cmdk client:only="svelte" />
+    <Hud client:only="svelte" />
+  </body>
+</html>
+
+<script>
+  import "$/lib/dither";
+  import { gsap } from "gsap";
+
+  const WORDMARK_SCROLL_END = 200;
+  const WORDMARK_FADE_MAX = 0.8;
+  const CMDK_MOTION_DURATION = 0.15;
+
+  const wordmark = getRequiredElement("h1#wordmark");
+  const fade = getRequiredElement("div#fade");
+  const content = getRequiredElement("div#content");
+  const cmdkTrigger = document.querySelector(
+    "button#cmdk_trigger",
+  ) as HTMLButtonElement | null;
+
+  function getRequiredElement(selector: string) {
+    const element = document.querySelector(selector);
+
+    if (!(element instanceof HTMLElement)) {
+      throw new Error(`Minimal layout expected ${selector} element.`);
+    }
+
+    return element;
+  }
+
+  let isCmdkOpen = false;
+  let pendingWordmarkFrame = 0;
+  let wordmarkTimeline: gsap.core.Timeline | null = null;
+
+  function resolveBreakpointPx(name: string, fallbackRem: number) {
+    const rootStyle = getComputedStyle(document.documentElement);
+    const rawValue = rootStyle.getPropertyValue(name).trim();
+    const rootFontSize = parseFloat(rootStyle.fontSize);
+
+    if (rawValue.endsWith("rem")) {
+      return parseFloat(rawValue) * rootFontSize;
+    }
+
+    if (rawValue.endsWith("px")) {
+      return parseFloat(rawValue);
+    }
+
+    return fallbackRem * rootFontSize;
+  }
+
+  function getWordmarkTopPx(viewportWidth: number, viewportHeight: number) {
+    const sm = resolveBreakpointPx("--breakpoint-sm", 40);
+    const md = resolveBreakpointPx("--breakpoint-md", 48);
+    const oneThird = viewportHeight / 3;
+    const oneHalf = viewportHeight / 2;
+
+    if (viewportWidth <= sm) return oneThird;
+    if (viewportWidth >= md) return oneHalf;
+
+    const progress = (viewportWidth - sm) / (md - sm);
+    return oneThird + (oneHalf - oneThird) * progress;
+  }
+
+  function wordmarkProgressFromScroll() {
+    return Math.max(0, Math.min(window.scrollY / WORDMARK_SCROLL_END, 1));
+  }
+
+  function ensureWordmarkMotion() {
+    if (wordmarkTimeline) return;
+
+    wordmarkTimeline = gsap
+      .timeline({ paused: true })
+      .fromTo(
+        fade,
+        { opacity: 0 },
+        {
+          opacity: WORDMARK_FADE_MAX,
+          ease: "none",
+          duration: 1,
+        },
+      )
+      .to(
+        wordmark,
+        {
+          filter: "blur(8px)",
+          ease: "none",
+          duration: 0.5,
+        },
+        "<",
+      );
+  }
+
+  function syncWordmarkProgress() {
+    ensureWordmarkMotion();
+    if (!wordmarkTimeline) return;
+
+    wordmarkTimeline.progress(isCmdkOpen ? 1 : wordmarkProgressFromScroll());
+  }
+
+  function queueWordmarkSync() {
+    if (pendingWordmarkFrame) return;
+
+    pendingWordmarkFrame = requestAnimationFrame(() => {
+      pendingWordmarkFrame = 0;
+      if (isCmdkOpen) return;
+      syncWordmarkProgress();
+    });
+  }
+
+  function tweenWordmarkTo(progress: number) {
+    if (!wordmarkTimeline) return;
+
+    gsap.killTweensOf(wordmarkTimeline);
+    gsap.to(wordmarkTimeline, {
+      progress,
+      duration: CMDK_MOTION_DURATION,
+      ease: "power2.out",
+      overwrite: "auto",
+    });
+  }
+
+  function handleCmdkOpened() {
+    isCmdkOpen = true;
+    tweenWordmarkTo(1);
+  }
+
+  function handleCmdkClosed() {
+    isCmdkOpen = false;
+    tweenWordmarkTo(wordmarkProgressFromScroll());
+  }
+
+  type FitHeadingOptions = {
+    element: HTMLElement;
+    paddingRem?: number;
+  };
+
+  export async function fitHeading({
+    element,
+    paddingRem = 8,
+  }: FitHeadingOptions) {
+    await document.fonts.ready;
+
+    const maxLines = element.innerText.length > 15 ? 2 : 1;
+    const rootFontSize = parseFloat(
+      getComputedStyle(document.documentElement).fontSize,
+    );
+    const maxWidth = window.innerWidth - paddingRem * rootFontSize * 2;
+
+    element.style.maxWidth = `${maxWidth}px`;
+    element.style.whiteSpace = "normal";
+
+    let lastGood = 8;
+    let lo = 8;
+    let hi = 2000;
+
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1;
+      element.style.fontSize = `${mid}px`;
+
+      if (getLineCount(element) > maxLines || element.scrollWidth > maxWidth) {
+        hi = mid - 1;
+      } else {
+        lastGood = mid;
+        lo = mid + 1;
+      }
+    }
+
+    element.style.fontSize = `${lastGood}px`;
+  }
+
+  function getLineCount(element: HTMLElement) {
+    const style = getComputedStyle(element);
+    const fontSize = parseFloat(style.fontSize);
+    const lineHeight =
+      style.lineHeight === "normal"
+        ? fontSize * 1.2
+        : parseFloat(style.lineHeight);
+
+    return Math.round(element.scrollHeight / lineHeight);
+  }
+
+  function getWordmarkPaddingRem() {
+    if (window.innerWidth > content.clientWidth + 64) {
+      return 8;
+    }
+
+    return (window.innerWidth - content.clientWidth) / 2 / 16 + 1.5;
+  }
+
+  function positionContentBelowWordmark() {
+    const wordmarkBottom = wordmark.getBoundingClientRect().bottom;
+    const contentTop = wordmarkBottom - 48;
+
+    content.style.marginTop = `${contentTop}px`;
+    content.style.setProperty("--content-resting-offset", `${contentTop}px`);
+  }
+
+  async function resize() {
+    wordmark.style.top = `${getWordmarkTopPx(
+      window.innerWidth,
+      window.innerHeight,
+    )}px`;
+
+    await fitHeading({
+      element: wordmark,
+      paddingRem: getWordmarkPaddingRem(),
+    });
+
+    positionContentBelowWordmark();
+    ensureWordmarkMotion();
+    syncWordmarkProgress();
+  }
+
+  function handleResize() {
+    if (window.innerWidth === lastLayoutWidth) return;
+
+    lastLayoutWidth = window.innerWidth;
+    resize();
+  }
+
+  function handleCmdkTriggerClick() {
+    window.dispatchEvent(new CustomEvent("cmdk-toggle"));
+  }
+
+  window.addEventListener("cmdk-opened", handleCmdkOpened);
+  window.addEventListener("cmdk-closed", handleCmdkClosed);
+  window.addEventListener("scroll", queueWordmarkSync, { passive: true });
+
+  let lastLayoutWidth = window.innerWidth;
+
+  resize();
+  window.addEventListener("resize", handleResize);
+  cmdkTrigger?.addEventListener("click", handleCmdkTriggerClick);
+</script>

@@ -1,0 +1,44 @@
+---
+import { getCollection, render } from "astro:content";
+import Root from "$/layouts/minimal.astro";
+import OverscrollTail from "$/lib/overscroll-tail.astro";
+import { format } from "$/lib/date";
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  return posts.map((post) => ({
+    params: {
+      slug: post.id.split("/").pop(),
+      year: new Date(post.data.date).getFullYear().toString(),
+    },
+    props: post,
+  }));
+}
+
+const post = Astro.props;
+const { Content } = await render(post);
+---
+
+<Root
+  title={post.data.title}
+  description={post.data.description}
+  ogType="article"
+  publishedTime={post.data.date.toISOString()}
+  modifiedTime={post.data.date.toISOString()}
+>
+  <article data-page-content class="w-full content-bg">
+    <main class="px-7 py-5 yap">
+      <div class="flex w-full text-mauve-400 font-mono mb-0 text-sm">
+      <span>~/writing/{post.data.date.getFullYear()}/{post.id.split("/").pop()}</span>
+      <span class="ml-auto">
+      {format(post.data.date)}
+      </span>
+      </div>
+      <span class="text-mauve-400 font-mono mb-3 -mt-1.5 block text-xs">{"~".repeat(`~/writing/${post.data.date.getFullYear()}/${post.id.split("/").pop()}`.length * 1.175)}</span>
+      <Content />
+    </main>
+  </article>
+  <OverscrollTail />
+</Root>

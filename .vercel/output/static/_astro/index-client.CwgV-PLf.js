@@ -1,1 +1,0 @@
-import{ar as o,as as t,am as u,u as l,af as e}from"./branches.Cgfd_WGf.js";function c(n){o===null&&t(),u&&o.l!==null?s(o).m.push(n):l(()=>{const a=e(n);if(typeof a=="function")return a})}function i(n){o===null&&t(),c(()=>()=>e(n))}function s(n){var a=n.l;return a.u??={a:[],b:[],m:[]}}export{i as a,c as o};

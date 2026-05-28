@@ -1,0 +1,7 @@
+{
+  "label": "Projects",
+  "type": "type",
+  "value": "project",
+  "aliases": ["project", "builds"],
+  "order": 15
+}

@@ -1,0 +1,7 @@
+{
+  "label": "Page",
+  "type": "type",
+  "value": "page",
+  "aliases": ["pages"],
+  "order": 20
+}

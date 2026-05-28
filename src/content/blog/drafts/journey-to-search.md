@@ -31,3 +31,7 @@ Around this time I realised I was over engineering this whole indexer / search t
 So after being discouraged, I remembered that I didn't have to choose between 100% vibes and no vibes, so I made Zen's agent make a very basic draft, which was styled and had basic functionality, and then I gutted a large part of the search logic and I made my new "search engine," which is fuse classes which then get used by an [astro actions](https://docs.astro.build/en/guides/actions/)
 
 So, this was a very simple solution, but it works great and I can't think of any improvement to make to it, other than a blank / default state for when there isn't a search query yet. 
+
+# Part 4, Updates
+
+It is now a bit over a month later (10 Aug 2025)

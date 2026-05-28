@@ -1,48 +1,37 @@
 {
-  "name": "jafupycomv3",
+  "name": "jafupy-com",
   "type": "module",
   "version": "0.0.1",
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
-    "dev": "astro dev --host",
+    "dev": "bunx --bun astro dev",
+    "check": "astro check",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro",
-    "index": "cd indexer && go run main.go",
-    "index:verbose": "cd indexer && go run main.go -verbose",
-    "index:quiet": "cd indexer && go run main.go -quiet",
-    "index:stats": "cd indexer && go run main.go -verbose -stats",
-    "build:indexer": "cd indexer && go build -o ../bin/indexer main.go",
-    "clean": "rm -rf bin/ dist/"
+    "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/mdx": "4.3.1",
-    "@astrojs/react": "^4.3.0",
-    "@astrojs/rss": "^4.0.12",
-    "@astrojs/sitemap": "^3.4.1",
-    "@astrojs/tailwind": "^6.0.2",
-    "@astrojs/vercel": "8.2.2",
-    "@floating-ui/react": "^0.27.14",
-    "@milkdown/crepe": "^7.15.1",
-    "@radix-ui/react-popover": "^1.1.14",
-    "@tailwindcss/typography": "^0.5.16",
-    "@tailwindcss/vite": "^4.1.10",
-    "astro": "5.12.0",
-    "chokidar": "^4.0.3",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "cmdk": "^1.1.1",
-    "d3": "^7.9.0",
+    "@astrojs/svelte": "^8.0.0",
+    "@astrojs/vercel": "^10.0.0",
+    "@fontsource-variable/bricolage-grotesque": "^5.2.10",
+    "@fontsource-variable/brygada-1918": "^5.2.8",
+    "@fontsource-variable/jetbrains-mono": "^5.2.8",
+    "@lucide/svelte": "^0.577.0",
+    "@tailwindcss/vite": "^4.2.1",
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/xterm": "^6.0.0",
+    "astro": "^6.0.4",
+    "bits-ui": "^2.16.3",
     "fuse.js": "^7.1.0",
-    "gsap": "^3.13.0",
-    "lucide-react": "^0.525.0",
-    "react-dom": "^19.1.0",
-    "react-hotkeys-hook": "^5.1.0",
-    "tailwind-merge": "^3.3.1",
-    "tailwindcss": "^4.1.10"
+    "gsap": "^3.14.2",
+    "svelte": "^5.53.12",
+    "tailwindcss": "^4.2.1",
+    "typescript": "^5.9.3",
+    "xterm": "^5.3.0"
   },
   "devDependencies": {
-    "sass": "^1.89.2",
-    "sass-embedded": "^1.89.2",
-    "tw-animate-css": "^1.3.5"
+    "@astrojs/check": "^0.9.4"
   }
 }

@@ -1,0 +1,7 @@
+{
+  "label": "Writing",
+  "type": "type",
+  "value": "writing",
+  "aliases": ["post", "blog"],
+  "order": 10
+}
