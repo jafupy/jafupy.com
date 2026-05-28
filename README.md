@@ -1,46 +1,77 @@
-# Astro Starter Kit: Basics
+# jafupy.com
+
+Personal site built with Astro and Svelte.
+
+## Stack
+
+- Astro 6
+- Svelte 5 islands
+- Tailwind CSS 4
+- Astro content collections for writing
+- Astro Actions + Fuse.js for search
+- Vercel adapter for deployment
+
+## Site Structure
+
+- `src/pages/index.astro`: homepage
+- `src/pages/about.astro`: about page
+- `src/pages/writing/index.astro`: writing index
+- `src/pages/writing/[year]/[slug].astro`: individual posts
+- `src/layouts/minimal.astro`: shared layout, nav, wordmark, command palette host
+- `src/actions/index.ts`: search/filter actions
+- `src/content/blog`: published writing
+- `src/content/cmdk-tags`: command palette filter metadata
+
+## Development
+
+Install dependencies:
 
 ```sh
-bun create astro@latest -- --template basics
+bun install
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Start the dev server:
 
-## 🚀 Project Structure
-
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
-└── package.json
+```sh
+bun run dev
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+Build for production:
 
-## 🧞 Commands
+```sh
+bun run build
+```
 
-All commands are run from the root of the project, from a terminal:
+Preview the production build locally:
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `bun install`             | Installs dependencies                            |
-| `bun dev`             | Starts local dev server at `localhost:4321`      |
-| `bun build`           | Build your production site to `./dist/`          |
-| `bun preview`         | Preview your build locally, before deploying     |
-| `bun astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `bun astro -- --help` | Get help using the Astro CLI                     |
+```sh
+bun run preview
+```
 
-## 👀 Want to learn more?
+## Content
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+Published posts live in `src/content/blog` and use frontmatter with:
+
+```md
+---
+title: Post title
+date: 2026-03-26
+description: Short summary
+---
+```
+
+Routes are generated as `/writing/<year>/<slug>/`.
+
+## Search
+
+The command palette is mounted from the root layout and powered by:
+
+- static page/social/action entries
+- writing content from the blog collection
+- filters from `src/content/cmdk-tags`
+
+Server-side search lives in `src/actions/index.ts`.
+
+## Deployment
+
+The project is configured for Vercel via `@astrojs/vercel`.
