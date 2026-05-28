@@ -69,7 +69,7 @@
   </TOpen>
 </T>
 <T>
-  <TCollapsed><TTrigger>{age.years}</TTrigger></TCollapsed>
+  <TCollapsed><TTrigger>{age.years}</TTrigger>,</TCollapsed>
   <TOpen>I'm <T><TCollapsed><TTrigger>{age.years}</TTrigger> years old</TCollapsed><TOpen>{age.years} years, {age.months} months and {age.days} days old to be exact</TOpen></T>, born Jan 12, 2010.</TOpen>
 </T>
 I live in
