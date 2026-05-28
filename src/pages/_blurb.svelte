@@ -74,7 +74,7 @@
 </T>
 I live in
 <T>
-  <TCollapsed><TTrigger>southern England</TTrigger></TCollapsed>
+  <TCollapsed><TTrigger>southern England</TTrigger>.</TCollapsed>
   <TOpen>southern England, but I'm Polish.</TOpen>
 </T>
 <T>
