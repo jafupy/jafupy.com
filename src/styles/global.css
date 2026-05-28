@@ -24,3 +24,30 @@
 
   --color-old-rose: #cb8b8c;
 }
+
+@layer base {
+  body > dither-shader {
+    position: fixed !important;
+    inset: 0 !important;
+    transform: translateY(-8rem);
+    height: calc(100% + 28rem);
+  }
+
+  .content-bg {
+    border-top-left-radius: var(--radius-2xl);
+    border-top-right-radius: var(--radius-2xl);
+    background: color-mix(in oklch, white 5%, transparent);
+    border: 1px solid
+      color-mix(in oklch, var(--color-mauve-100) 10%, transparent);
+    border-bottom: 0;
+    backdrop-filter: blur(var(--blur-xl));
+  }
+
+  .content-padding {
+    padding-inline: 7;
+    padding-block: 5;
+    border-bottom: 1px solid
+      color-mix(in oklch, var(--color-mauve-100) 20%, transparent);
+  }
+
+}

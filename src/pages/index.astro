@@ -1,142 +1,251 @@
 ---
 import Root from "$/layouts/minimal.astro";
-import { GithubIcon, MailOpenIcon, TwitterIcon } from "@lucide/svelte";
+import Divider from "$/lib/divider.svelte";
+import OverscrollTail from "$/lib/overscroll-tail.astro";
+import { projects } from "$/projects";
+import { ArrowRightIcon } from "@lucide/svelte";
+import { format } from "$/lib/date";
+import Blurb from "./_blurb.svelte";
+
 
 import { getCollection } from "astro:content";
 
-const posts = (await getCollection("blog"))
-  .sort((a: any, b: any) => b.data.date.valueOf() - a.data.date.valueOf())
-  .slice(0, 5);
+const allPosts = (await getCollection("blog")).sort(
+  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
+);
+const posts = allPosts.slice(0, 4);
 
 const latest = posts[0];
+const featuredOptions = [
+  ...allPosts.map((post) => ({
+    title: post.data.title,
+    description: post.data.description,
+    href: `/writing/${post.data.date.getFullYear()}/${post.id}`,
+    meta: format(post.data.date),
+    cta: "Read",
+    kind: "writing",
+  })),
+  ...projects.map((project) => ({
+    title: project.title,
+    description: project.description,
+    href: project.href,
+    meta: "Emulator",
+    cta: "Play",
+    kind: "game",
+  })),
+];
 ---
 
-<Root>
-  <div
-    class="rounded-t-2xl bg-white/5 border-[0.5px] border-white/13 border-b-0 backdrop-blur-xl"
-  >
-    <!-- Blurb -->
-    <div class="px-7 py-5 border-b border-white/7">
-      <p class="text-mauve-100 leading-relaxed">
+<Root
+  description="Personal site of Jacob with writing, software projects, experiments, and notes on code, fiction, and building things."
+>
+  <div data-page-content class="content-bg @container">
+
+    <!-- Blurb + Socials -->
+    <div class="px-7 py-6 ">
+      <Blurb client:load/>
+      <p class="leading-relaxed mb-5">
         I'm <span class="text-old-rose">Jacob</span>, <span
           class="text-old-rose">16</span
-        >, from <span class="text-old-rose">southern England</span>. I make
-        things with <span class="text-old-rose">code</span>, yap, and play
-        guitar. Currently building dev tools in Rust, working on a <span
-          class="text-old-rose">dystopian novella</span
-        >, and studying for my <span class="text-old-rose">GCSEs</span>.
+        >, from <span class="text-old-rose">southern England</span>. I do stuff.
       </p>
+      <div class="flex items-center gap-6 flex-wrap">
+        <a
+          href="https://github.com/jafupy"
+          class="font-mono text-sm text-old-rose transition-colors hover:underline underline-offset-4"
+        >
+          GitHub
+        </a>
+        <a
+          href="https://x.com/jafupy"
+          class="font-mono text-sm text-old-rose transition-colors hover:underline underline-offset-4"
+        >
+          Twitter
+        </a>
+        <a
+          href="mailto:hello@jafupy.com"
+          class="font-mono text-sm text-old-rose transition-colors hover:underline underline-offset-4"
+        >
+          hello@jafupy.com
+        </a>
+      </div>
     </div>
 
-    <!-- Socials -->
-    <div class="px-7 py-4 flex items-center gap-5">
+    <!-- Featured — bleeds 1rem past card edges -->
+    <div
+      class="-mx-4 cursor-pointer group"
+      data-featured-card
+      data-featured-options={JSON.stringify(featuredOptions)}
+    >
       <a
-        href="https://github.com/jafupy"
-        class="flex items-center gap-2 text-mauve-400 hover:text-mauve-100 transition-colors"
-      >
-        <GithubIcon class="size-4 text-old-rose" />
-        <span class="font-mono text-xs">github</span>
-      </a>
-      <a
-        href="https://x.com/@jafupy"
-        class="flex items-center gap-2 text-mauve-400 hover:text-mauve-100 transition-colors"
-      >
-        <TwitterIcon class="size-4 text-old-rose" />
-        <span class="font-mono text-xs">twitter</span>
-      </a>
-      <a
-        href="mailto:jacob@jafupy.com"
-        class="flex items-center gap-2 text-mauve-400 hover:text-mauve-100 transition-colors"
-      >
-        <MailOpenIcon class="size-4 text-old-rose" />
-        <span class="font-mono text-xs">jacob@jafupy.com</span>
-      </a>
-    </div>
-
-    <!-- Featured — bleeds 1rem past card edges, stays sharp, between socials and writing -->
-    <div class="-mx-4 cursor-pointer group">
-      <a
+        data-featured-link
         href={`/writing/${latest.data.date.getFullYear()}/${latest.id}`}
-        class="p-5 flex flex-col border border-white/10 rounded-xl bg-mauve-800"
+        class="p-5 flex flex-col border border-mauve-100/20 rounded-xl bg-mauve-800"
       >
         <div
-          class="font-mono text-2xs tracking-widest uppercase text-mauve-400 mb-3"
+          data-featured-item
+          class="font-mono text-xs tracking-widest uppercase text-mauve-400 mb-3"
         >
           featured
         </div>
         <h2
-          class="font-serif text-mauve-100 text-2xl leading-snug mb-3 group-hover:text-white transition-colors"
+          data-featured-title
+          data-featured-item
+          class="font-serif text-2xl leading-snug mb-3 group-hover:text-white transition-colors"
         >
           {latest.data.title}
         </h2>
-        <p class="text-mauve-400 text-[14px] leading-relaxed mb-4">
+        <p
+          data-featured-description
+          data-featured-item
+          class="text-mauve-400 text-sm leading-relaxed mb-4"
+        >
           {latest.data.description}
         </p>
-        <div class="w-full flex items-center">
+        <div data-featured-item class="w-full flex items-center gap-2.5 pt-1">
           <span
-            class="font-mono text-sm text-mauve-400 group-hover:text-mauve-100 transition-colors"
-            >read
-          </span><div
-            class="size-1 bg-mauve-400 rounded-full mx-2 inline-block"
+            data-featured-meta
+            class="font-mono text-xs text-mauve-400 whitespace-nowrap"
           >
-          </div><span class="text-mauve-400 text-xs font-mono">8 min</span>
+            {format(latest.data.date)}
+          </span>
+          <Divider />
+          <span
+            data-featured-cta
+            class="inline-flex items-center gap-2 font-mono text-xs text-mauve-400 transition-colors group-hover:text-mauve-300"
+          >
+            Read
+            <ArrowRightIcon class="size-4" />
+          </span>
         </div>
       </a>
     </div>
-    <!-- Writing list -->
-    <div
-      class="flex items-center justify-between px-7 h-9 border-b border-white/[0.07] font-mono-custom text-[11px] tracking-widest uppercase text-mauve-400"
-    >
-      Writing
-    </div>
 
-    {
-      posts.slice(1, 5).map((post: any) => (
-        <a
-          href={`/writing/${post.data.date.getFullYear()}/${post.id}/`}
-          class="flex items-baseline justify-between px-7 py-5 border-b border-white/[0.07] cursor-pointer hover:bg-white/2"
-        >
-          <div class="flex flex-col gap-1.5">
-            <span class="yap:h3 mt-4!  text-mauve-100">{post.data.title}</span>
-            <span class="text-sm text-mauve-400">{post.data.description}</span>
-          </div>
-          <span class="font-mono text-xs text-mauve-400 whitespace-nowrap">
-            {
-              [
-                "Jan",
-                "Feb",
-                "Mar",
-                "Apr",
-                "May",
-                "Jun",
-                "Jul",
-                "Aug",
-                "Sep",
-                "Oct",
-                "Nov",
-                "Dec",
-              ][post.data.date.getMonth()]
-            }{" "}
-            {post.data.date.getFullYear()}
-          </span>
-        </a>
-      ))
+  </div>
+  <OverscrollTail />
+</Root>
+
+<script>
+  import { gsap } from "gsap";
+
+  /**
+   * @typedef {object} FeaturedOption
+   * @property {string} title
+   * @property {string} description
+   * @property {string} href
+   * @property {string} meta
+   * @property {string} cta
+   * @property {"writing" | "game"} kind
+   */
+
+  const featuredCard = document.querySelector("[data-featured-card]");
+
+  if (featuredCard instanceof HTMLElement) {
+    const featuredLink = featuredCard.querySelector("[data-featured-link]");
+    const featuredTitle = featuredCard.querySelector("[data-featured-title]");
+    const featuredDescription = featuredCard.querySelector(
+      "[data-featured-description]",
+    );
+    const featuredMeta = featuredCard.querySelector("[data-featured-meta]");
+    const featuredCta = featuredCard.querySelector("[data-featured-cta]");
+    const featuredItems = featuredCard.querySelectorAll("[data-featured-item]");
+    const cleanup = new AbortController();
+    const featuredOptionsRaw = featuredCard.dataset.featuredOptions;
+
+    function dayKey() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, "0");
+      const day = String(now.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
     }
 
-    <div class="flex items-center justify-between px-7 py-5">
-      <span class="font-mono-custom text-[12px] text-mauve-400"
-        >jacob@jafupy.com</span
-      >
-      <div class="flex gap-4">
-        <span
-          class="font-mono-custom text-[11px] text-mauve-400 cursor-pointer hover:text-mauve-100"
-          >github ↗</span
-        >
-        <span
-          class="font-mono-custom text-[11px] text-mauve-400 cursor-pointer hover:text-mauve-100"
-          >rss ↗</span
-        >
-      </div>
-    </div>
-  </div>
-</Root>
+    if (
+      typeof featuredOptionsRaw === "string" &&
+      featuredLink instanceof HTMLAnchorElement &&
+      featuredTitle instanceof HTMLElement &&
+      featuredDescription instanceof HTMLElement &&
+      featuredMeta instanceof HTMLElement &&
+      featuredCta instanceof HTMLElement
+    ) {
+      /** @type {FeaturedOption[]} */
+      const featuredOptions = JSON.parse(featuredOptionsRaw);
+      const today = dayKey();
+      let bucketHash = 0;
+      for (let i = 0; i < today.length; i++) {
+        bucketHash = (bucketHash * 31 + today.charCodeAt(i)) >>> 0;
+      }
+
+      const bucket = bucketHash % 2 === 0 ? "writing" : "game";
+      /** @type {FeaturedOption[]} */
+      const pool = [];
+      for (const option of featuredOptions) {
+        if (option.kind === bucket) pool.push(option);
+      }
+
+      const fallbackPool = pool.length > 0 ? pool : featuredOptions;
+      const featuredKey = `${today}:${bucket}`;
+      let featuredHash = 0;
+      for (let i = 0; i < featuredKey.length; i++) {
+        featuredHash = (featuredHash * 31 + featuredKey.charCodeAt(i)) >>> 0;
+      }
+      const featured = fallbackPool[featuredHash % fallbackPool.length];
+
+      if (featured) {
+        featuredLink.href = featured.href;
+        featuredTitle.textContent = featured.title;
+        featuredDescription.textContent = featured.description;
+        featuredMeta.textContent = featured.meta;
+        featuredCta.childNodes[0].textContent = `${featured.cta} `;
+      }
+    }
+
+    window.addEventListener(
+      "cmdk-closed",
+      () => {
+        gsap.killTweensOf([featuredCard, ...featuredItems]);
+        gsap.fromTo(
+          featuredCard,
+          {
+            marginLeft: 0,
+            marginRight: 0,
+            y: -10,
+          },
+          {
+            marginLeft: "-1rem",
+            marginRight: "-1rem",
+            y: 0,
+            duration: 0.15,
+            ease: "power3.out",
+            overwrite: "auto",
+          },
+        );
+
+        gsap.fromTo(
+          featuredItems,
+          {
+            y: 10,
+            opacity: 0,
+            filter: "blur(10px)",
+          },
+          {
+            y: 0,
+            opacity: 1,
+            filter: "blur(0px)",
+            duration: 0.15,
+            ease: "power3.out",
+            stagger: 0.04,
+            delay: 0.02,
+            overwrite: "auto",
+          },
+        );
+      },
+      { signal: cleanup.signal },
+    );
+
+    window.addEventListener("pagehide", () => cleanup.abort(), {
+      once: true,
+      signal: cleanup.signal,
+    });
+  }
+</script>

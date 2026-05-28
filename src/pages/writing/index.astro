@@ -1,7 +1,7 @@
 ---
 import Root from "$/layouts/minimal.astro";
 import { format } from "$/lib/date";
-import { GithubIcon, MailOpenIcon, TwitterIcon } from "@lucide/svelte";
+import OverscrollTail from "$/lib/overscroll-tail.astro";
 
 import { getCollection } from "astro:content";
 
@@ -10,18 +10,19 @@ const posts = (await getCollection("blog")).sort(
 );
 ---
 
-<Root title="Writing">
-  <div
-    class="rounded-t-2xl bg-white/5 border-[0.5px] border-white/13 border-b-0 backdrop-blur-xl"
-  >
+<Root
+  title="Writing"
+  description="Essays, notes, and blog posts by Jacob on programming, tools, and whatever else is worth writing down."
+>
+  <div data-page-content class="content-bg">
     {
       posts.map((post) => (
         <a
           href={`/writing/${post.data.date.getFullYear()}/${post.id}/`}
-          class="flex items-baseline justify-between px-7 py-5 border-b border-white/[0.07] cursor-pointer hover:bg-white/2"
+          class="flex items-baseline justify-between px-7 py-5 border-b border-mauve-100/20 cursor-pointer hover:bg-white/2"
         >
           <div class="flex flex-col gap-1.5">
-            <span class="yap:h3 mt-4!  text-mauve-100">{post.data.title}</span>
+            <span class="yap:h3">{post.data.title}</span>
             <span class="text-sm text-mauve-400">{post.data.description}</span>
           </div>
           <span class="font-mono text-xs text-mauve-400 whitespace-nowrap">
@@ -30,21 +31,6 @@ const posts = (await getCollection("blog")).sort(
         </a>
       ))
     }
-
-    <div class="flex items-center justify-between px-7 py-5">
-      <span class="font-mono-custom text-[12px] text-mauve-400"
-        >jacob@jafupy.com</span
-      >
-      <div class="flex gap-4">
-        <span
-          class="font-mono-custom text-[11px] text-mauve-400 cursor-pointer hover:text-mauve-100"
-          >github ↗</span
-        >
-        <span
-          class="font-mono-custom text-[11px] text-mauve-400 cursor-pointer hover:text-mauve-100"
-          >rss ↗</span
-        >
-      </div>
-    </div>
   </div>
+  <OverscrollTail />
 </Root>
