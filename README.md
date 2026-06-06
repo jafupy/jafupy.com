@@ -1,56 +1,52 @@
 # jafupy.com
 
-Personal site built with Astro and Svelte.
+Source for [jafupy.com](https://jafupy.com), Jacob's personal site.
 
-## Stack
+The site is a place for writing, projects, experiments, and small interactive
+pieces. It is built with Astro for routing/content and Svelte for client-side
+interactions.
 
-- Astro 6
-- Svelte 5 islands
-- Tailwind CSS 4
-- Astro content collections for writing
-- Astro Actions + Fuse.js for search
-- Vercel adapter for deployment
-
-## Site Structure
-
-- `src/pages/index.astro`: homepage
-- `src/pages/about.astro`: about page
-- `src/pages/writing/index.astro`: writing index
-- `src/pages/writing/[year]/[slug].astro`: individual posts
-- `src/layouts/minimal.astro`: shared layout, nav, wordmark, command palette host
-- `src/actions/index.ts`: search/filter actions
-- `src/content/blog`: published writing
-- `src/content/cmdk-tags`: command palette filter metadata
-
-## Development
-
-Install dependencies:
+## Quick Start
 
 ```sh
 bun install
-```
-
-Start the dev server:
-
-```sh
 bun run dev
 ```
 
-Build for production:
+Other useful commands:
 
 ```sh
+bun run check
 bun run build
-```
-
-Preview the production build locally:
-
-```sh
 bun run preview
 ```
 
-## Content
+## Architecture
 
-Published posts live in `src/content/blog` and use frontmatter with:
+Astro handles the site shell, routes, content collections, server output, and
+deployment adapter. Svelte is used for interactive components such as the
+command palette, telescope text interactions, HUD UI, and emulator pages.
+
+Search is served through Astro Actions in `src/actions/index.ts`. It combines
+static navigation entries, project metadata, command palette tags, and writing
+content, then ranks matches with Fuse.js.
+
+## Repository Map
+
+- `src/pages/`: route entry points
+- `src/layouts/`: shared Astro layouts
+- `src/content/blog/`: writing content
+- `src/content/cmdk-tags/`: command palette filter metadata
+- `src/actions/`: Astro server actions
+- `src/lib/cmdk/`: command palette implementation
+- `src/lib/telescope/`: expandable text interaction components
+- `src/emulator/`: terminal, game, and emulator experiments
+- `src/projects/`: project metadata
+- `src/styles/`: global CSS and typography
+
+## Writing
+
+Published posts live as Markdown files in `src/content/blog/`.
 
 ```md
 ---
@@ -62,16 +58,13 @@ description: Short summary
 
 Routes are generated as `/writing/<year>/<slug>/`.
 
-## Search
-
-The command palette is mounted from the root layout and powered by:
-
-- static page/social/action entries
-- writing content from the blog collection
-- filters from `src/content/cmdk-tags`
-
-Server-side search lives in `src/actions/index.ts`.
-
 ## Deployment
 
-The project is configured for Vercel via `@astrojs/vercel`.
+The site is configured for Vercel using `@astrojs/vercel` with server output
+and sitemap generation.
+
+## Licensing
+
+Source code is licensed under the MIT License. Written content under
+`src/content/blog/**` and human-authored text displayed on pages is copyright
+Jacob and all rights reserved. See `LICENSE.md` for details.
