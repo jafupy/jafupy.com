@@ -2,14 +2,17 @@
 import "@fontsource-variable/bricolage-grotesque";
 import "@fontsource-variable/jetbrains-mono";
 import "@fontsource-variable/brygada-1918";
+import SeoHead from "$/components/seo-head.astro";
 import "$/styles/global.css";
 
 interface Props {
   title: string;
+  description?: string;
 }
-const { title } = Astro.props;
-
-const pageTitle = `${title} | Jafu.py`;
+const {
+  title,
+  description = "Browser-based retro games and emulator experiments by Jacob.",
+} = Astro.props;
 ---
 
 <!doctype html>
@@ -17,9 +20,7 @@ const pageTitle = `${title} | Jafu.py`;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{pageTitle}</title>
-    <meta name="theme-color" content="#14121a" />
-    <link rel="icon" href="/favicon.png" />
+    <SeoHead {title} {description} />
   </head>
   <body
     class="bg-mauve-900 text-mauve-200 m-0 overflow-hidden h-dvh w-dvw grid place-items-center"

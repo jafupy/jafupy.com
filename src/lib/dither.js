@@ -548,14 +548,10 @@ class DitherShader extends HTMLElement {
     this._pointerEnabled = false;
 
     if (this._pointerQuery) {
-      if (this._pointerQuery.removeEventListener) {
-        this._pointerQuery.removeEventListener(
-          "change",
-          this._onPointerCapabilityChange,
-        );
-      } else {
-        this._pointerQuery.removeListener(this._onPointerCapabilityChange);
-      }
+      this._pointerQuery.removeEventListener(
+        "change",
+        this._onPointerCapabilityChange,
+      );
 
       this._pointerQuery = null;
     }
@@ -837,14 +833,10 @@ class DitherShader extends HTMLElement {
         "(hover: hover) and (pointer: fine)",
       );
 
-      if (this._pointerQuery.addEventListener) {
-        this._pointerQuery.addEventListener(
-          "change",
-          this._onPointerCapabilityChange,
-        );
-      } else {
-        this._pointerQuery.addListener(this._onPointerCapabilityChange);
-      }
+      this._pointerQuery.addEventListener(
+        "change",
+        this._onPointerCapabilityChange,
+      );
     }
 
     const enabled = this._flag("cursor", true) && this._pointerQuery.matches;
