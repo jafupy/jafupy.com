@@ -10,13 +10,10 @@
   } from "@lucide/svelte";
   import { format } from "../date";
   import type {
-    ActionResult,
     FilterResult,
-    PageResult,
     ProjectResult,
     WritingResult,
     SearchResult,
-    SocialResult,
   } from "./search.svelte";
 
   const {
@@ -38,24 +35,16 @@
         : "px-7 py-4",
   );
 
-  function iconFor(result: SearchResult): typeof LucideIcon {
-    switch (result.type) {
-      case "writing":
-        return NewspaperIcon;
-      case "page":
-        return Link2Icon;
-      case "project":
-        return FolderIcon;
-      case "action":
-        return CopyIcon;
-      case "social":
-        return WaypointsIcon;
-      case "filter":
-        return TagIcon;
-    }
-  }
+  const icons = {
+    action: CopyIcon,
+    filter: TagIcon,
+    page: Link2Icon,
+    project: FolderIcon,
+    social: WaypointsIcon,
+    writing: NewspaperIcon,
+  } satisfies Record<SearchResult["type"], typeof LucideIcon>;
 
-  const ResultIcon = iconFor(result);
+  const ResultIcon = icons[result.type];
 
   function capitalise(value: string) {
     return value.charAt(0).toUpperCase() + value.slice(1);
@@ -92,19 +81,26 @@
   {/if}
 {/snippet}
 
-{#snippet pageResult(result: PageResult)}
+{#snippet simpleResult(label: string, title: string, description?: string)}
   <div class="flex items-center justify-between gap-4">
     <div class="min-w-0">
       <div
         class="mb-1 font-mono text-xs uppercase tracking-widest text-mauve-400"
       >
-        Page
+        {label}
       </div>
       <p class="truncate font-serif transition-colors">
-        {result.title}
+        {title}
       </p>
+      {#if selected && description}
+        <p class="mt-3 text-sm leading-relaxed text-mauve-400">
+          {description}
+        </p>
+      {/if}
     </div>
-    {@render icon()}
+    {#if label !== "Action"}
+      {@render icon()}
+    {/if}
   </div>
 {/snippet}
 
@@ -116,50 +112,12 @@
       >
         project
       </div>
-      <p class="font-serif text-xl leading-tight">
-        {result.title}
-      </p>
+      <p class="font-serif text-xl leading-tight">{result.title}</p>
       {#if result.description}
         <p class="mt-3 text-sm leading-relaxed text-mauve-400">
           {result.description}
         </p>
       {/if}
-    </div>
-    {@render icon()}
-  </div>
-{/snippet}
-
-{#snippet actionResult(result: ActionResult)}
-  <div class="flex items-center justify-between gap-4">
-    <div class="min-w-0">
-      <div
-        class="mb-1 font-mono text-xs uppercase tracking-widest text-mauve-400"
-      >
-        Action
-      </div>
-      <p class="truncate font-serif transition-colors">
-        {result.title}
-      </p>
-      {#if selected}
-        <p class="mt-3 text-sm leading-relaxed text-mauve-400">
-          {result.description}
-        </p>
-      {/if}
-    </div>
-  </div>
-{/snippet}
-
-{#snippet socialResult(result: SocialResult)}
-  <div class="flex items-center justify-between gap-4">
-    <div class="min-w-0">
-      <div
-        class="mb-1 font-mono text-xs uppercase tracking-widest text-mauve-400"
-      >
-        Social
-      </div>
-      <p class="truncate font-serif transition-colors">
-        {result.title}
-      </p>
     </div>
     {@render icon()}
   </div>
@@ -201,11 +159,11 @@
     {:else if result.type === "project"}
       {@render projectResult(result)}
     {:else if result.type === "page"}
-      {@render pageResult(result)}
+      {@render simpleResult("Page", result.title)}
     {:else if result.type === "action"}
-      {@render actionResult(result)}
+      {@render simpleResult("Action", result.title, result.description)}
     {:else if result.type === "social"}
-      {@render socialResult(result)}
+      {@render simpleResult("Social", result.title)}
     {:else}
       {@render filterResult(result)}
     {/if}

@@ -1,13 +1,11 @@
 ---
 import Root from "$/layouts/minimal.astro";
+import { getPostHref, sortPostsByDate } from "$/lib/blog";
 import { format } from "$/lib/date";
 import OverscrollTail from "$/lib/overscroll-tail.astro";
-
 import { getCollection } from "astro:content";
 
-const posts = (await getCollection("blog")).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
-);
+const posts = sortPostsByDate(await getCollection("blog"));
 ---
 
 <Root
@@ -18,7 +16,7 @@ const posts = (await getCollection("blog")).sort(
     {
       posts.map((post) => (
         <a
-          href={`/writing/${post.data.date.getFullYear()}/${post.id}/`}
+          href={getPostHref(post)}
           class="flex items-baseline justify-between px-7 py-5 border-b border-mauve-100/20 cursor-pointer hover:bg-white/2"
         >
           <div class="flex flex-col gap-1.5">

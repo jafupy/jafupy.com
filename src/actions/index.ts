@@ -3,13 +3,13 @@ import { z } from "astro/zod";
 import { getCollection } from "astro:content";
 import Fuse from "fuse.js";
 import type {
+  ActionResult,
   Filter,
   PageResult,
   ProjectResult,
-  WritingResult,
   SearchResult,
   SocialResult,
-  ActionResult,
+  WritingResult,
 } from "$/lib/cmdk/search.svelte";
 import { projects } from "$/projects";
 
@@ -27,14 +27,9 @@ type SearchableProjectResult = ProjectResult & {
   body?: string;
 };
 
-function toFilterId(type: Filter["type"], value: string) {
-  return `${type}:${value}`;
-}
-
 const STATIC_ITEMS: (PageResult | ActionResult | SocialResult)[] = [
   { type: "page", title: "Home", href: "/" },
   { type: "page", title: "Writing", href: "/writing" },
-  { type: "page", title: "Projects", href: "/projects" },
   {
     type: "action",
     title: "Copy email",
@@ -54,16 +49,20 @@ function compareAlphabetically(
   });
 }
 
+const toFilterId = (type: Filter["type"], value: string) => `${type}:${value}`;
+const stripSearchFields = ({ body: _, year: __, ...result }: SearchableResult) =>
+  result;
+
 async function getPosts(): Promise<SearchableWritingResult[]> {
   const posts = await getCollection("blog");
-  return posts.map((p) => ({
+  return posts.map((post) => ({
     type: "writing",
-    title: p.data.title,
-    description: p.data.description,
-    slug: p.id,
-    date: p.data.date.toISOString(),
-    body: p.body,
-    year: p.data.date.getFullYear().toString(),
+    title: post.data.title,
+    description: post.data.description,
+    slug: post.id,
+    date: post.data.date.toISOString(),
+    body: post.body,
+    year: post.data.date.getFullYear().toString(),
   }));
 }
 
@@ -80,13 +79,13 @@ async function getTagFilters(): Promise<Filter[]> {
   const tags = await getCollection("cmdkTags");
 
   return tags
-    .map((tag) => ({
-      id: toFilterId(tag.data.type, tag.data.value),
-      type: tag.data.type,
-      value: tag.data.value,
-      label: tag.data.label,
-      aliases: tag.data.aliases,
-      order: tag.data.order,
+    .map(({ data }) => ({
+      id: toFilterId(data.type, data.value),
+      type: data.type,
+      value: data.value,
+      label: data.label,
+      aliases: data.aliases,
+      order: data.order,
     }))
     .sort((a, b) => a.order - b.order)
     .map(({ order: _, ...filter }) => filter);
@@ -128,8 +127,7 @@ export const server = {
       ),
     }),
     async handler({ query, filters }) {
-      const posts = await getPosts();
-      const projects = await getProjects();
+      const [posts, projects] = await Promise.all([getPosts(), getProjects()]);
       const all: SearchableResult[] = [...posts, ...projects, ...STATIC_ITEMS];
       const filterGroups = filters.reduce((groups, filter) => {
         const values = groups.get(filter.type) ?? new Set<string>();
@@ -139,29 +137,26 @@ export const server = {
       }, new Map<Filter["type"], Set<string>>());
 
       const filtered = all.filter((item) => {
-        for (const [filterType, values] of filterGroups) {
-          if (filterType === "type" && !values.has(item.type)) {
+        for (const [type, values] of filterGroups) {
+          if (type === "type" && !values.has(item.type)) return false;
+          if (
+            type === "year" &&
+            (item.type !== "writing" || !item.year || !values.has(item.year))
+          ) {
             return false;
-          }
-
-          if (filterType === "year") {
-            if (item.type !== "writing") return false;
-            if (!item.year || !values.has(item.year)) return false;
           }
         }
 
         return true;
       });
 
-      // if no query, return the filtered list alphabetically
       if (!query.trim()) {
         return filtered
           .slice()
           .sort(compareAlphabetically)
-          .map(({ body: _, year: __, ...rest }) => rest);
+          .map(stripSearchFields);
       }
 
-      // fuse search over filtered set
       const fuse = new Fuse(filtered, {
         keys: [
           { name: "title", weight: 3 },
@@ -179,7 +174,7 @@ export const server = {
           return scoreDiff || compareAlphabetically(a.item, b.item);
         })
         .map((r) => r.item)
-        .map(({ body: _, year: __, ...rest }) => rest);
+        .map(stripSearchFields);
     },
   }),
 };

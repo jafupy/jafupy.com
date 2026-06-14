@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from "astro:content";
 import Root from "$/layouts/minimal.astro";
+import { getPostSlug, getPostYear } from "$/lib/blog";
 import OverscrollTail from "$/lib/overscroll-tail.astro";
 import { format } from "$/lib/date";
 
@@ -10,8 +11,8 @@ export async function getStaticPaths() {
   const posts = await getCollection("blog");
   return posts.map((post) => ({
     params: {
-      slug: post.id.split("/").pop(),
-      year: new Date(post.data.date).getFullYear().toString(),
+      slug: getPostSlug(post),
+      year: getPostYear(post),
     },
     props: post,
   }));
@@ -19,6 +20,7 @@ export async function getStaticPaths() {
 
 const post = Astro.props;
 const { Content } = await render(post);
+const postPath = `~/writing/${getPostYear(post)}/${getPostSlug(post)}`;
 ---
 
 <Root
@@ -31,12 +33,14 @@ const { Content } = await render(post);
   <article data-page-content class="w-full content-bg">
     <main class="px-7 py-5 yap">
       <div class="flex w-full text-mauve-400 font-mono mb-0 text-sm">
-      <span>~/writing/{post.data.date.getFullYear()}/{post.id.split("/").pop()}</span>
-      <span class="ml-auto">
-      {format(post.data.date)}
-      </span>
+        <span>{postPath}</span>
+        <span class="ml-auto">
+          {format(post.data.date)}
+        </span>
       </div>
-      <span class="text-mauve-400 font-mono mb-3 -mt-1.5 block text-xs">{"~".repeat(`~/writing/${post.data.date.getFullYear()}/${post.id.split("/").pop()}`.length * 1.175)}</span>
+      <span class="text-mauve-400 font-mono mb-3 -mt-1.5 block text-xs">
+        {"~".repeat(postPath.length * 1.175)}
+      </span>
       <Content />
     </main>
   </article>

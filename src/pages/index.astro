@@ -1,17 +1,14 @@
 ---
 import Root from "$/layouts/minimal.astro";
+import { getPostHref, sortPostsByDate } from "$/lib/blog";
 import Divider from "$/lib/divider.svelte";
 import OverscrollTail from "$/lib/overscroll-tail.astro";
 import { ArrowRightIcon } from "@lucide/svelte";
 import { format } from "$/lib/date";
 import Blurb from "./_blurb.svelte";
-
-
 import { getCollection } from "astro:content";
 
-const allPosts = (await getCollection("blog")).sort(
-  (a, b) => b.data.date.valueOf() - a.data.date.valueOf(),
-);
+const allPosts = sortPostsByDate(await getCollection("blog"));
 const posts = allPosts.slice(0, 4);
 
 const latest = posts[0];
@@ -21,10 +18,9 @@ const latest = posts[0];
   description="Personal site of Jacob with writing, software projects, experiments, and notes on code, fiction, and building things."
 >
   <div data-page-content class="content-bg @container">
-
     <!-- Blurb + Socials -->
-    <div class="px-7 py-6 ">
-      <Blurb client:load/>
+    <div class="px-7 py-6">
+      <Blurb client:load />
       <div class="flex items-center gap-6 flex-wrap mt-2">
         <a
           href="https://github.com/jafupy"
@@ -48,11 +44,9 @@ const latest = posts[0];
     </div>
 
     <!-- Featured — bleeds 1rem past card edges -->
-    <div
-      class="-mx-4 cursor-pointer group"
-    >
+    <div class="-mx-4 cursor-pointer group">
       <a
-        href={`/writing/${latest.data.date.getFullYear()}/${latest.id}`}
+        href={getPostHref(latest)}
         class="p-5 flex flex-col border border-mauve-100/20 rounded-xl bg-mauve-800"
       >
         <div
@@ -65,15 +59,11 @@ const latest = posts[0];
         >
           {latest.data.title}
         </h2>
-        <p
-          class="text-mauve-400 text-sm leading-relaxed mb-4"
-        >
+        <p class="text-mauve-400 text-sm leading-relaxed mb-4">
           {latest.data.description}
         </p>
         <div class="w-full flex items-center gap-2.5 pt-1">
-          <span
-            class="font-mono text-xs text-mauve-400 whitespace-nowrap"
-          >
+          <span class="font-mono text-xs text-mauve-400 whitespace-nowrap">
             {format(latest.data.date)}
           </span>
           <Divider />
@@ -86,7 +76,6 @@ const latest = posts[0];
         </div>
       </a>
     </div>
-
   </div>
   <OverscrollTail />
 </Root>
