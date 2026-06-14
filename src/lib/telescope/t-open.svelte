@@ -2,6 +2,7 @@
   import { gsap } from "gsap";
   import type { Snippet } from "svelte";
   import { tick } from "svelte";
+  import { prefersReducedMotion, TELESCOPE_TEXT_MOTION } from "./motion";
   import { getTelescopeContext } from "./telescope-context.svelte";
   import { splitOwnText, type TextSplit } from "./text-split";
 
@@ -24,9 +25,13 @@
 
       split = splitOwnText(node);
 
-      if (!split.chars.length) return;
+      if (!split.chars.length) {
+        split.revert();
+        split = null;
+        return;
+      }
 
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      if (prefersReducedMotion()) {
         gsap.set(split.chars, { clearProps: "all" });
         split.revert();
         split = null;
@@ -36,18 +41,18 @@
       tween = gsap.fromTo(
         split.chars,
         {
-          y: "0.45em",
+          y: TELESCOPE_TEXT_MOTION.y,
           opacity: 0,
-          filter: "blur(5px)",
+          filter: TELESCOPE_TEXT_MOTION.blur,
         },
         {
           y: 0,
           opacity: 1,
           filter: "blur(0px)",
-          duration: 0.34,
-          ease: "power3.out",
-          stagger: 0.006,
-          clearProps: "transform,opacity,filter",
+          duration: TELESCOPE_TEXT_MOTION.duration,
+          ease: TELESCOPE_TEXT_MOTION.easeOut,
+          stagger: TELESCOPE_TEXT_MOTION.stagger,
+          clearProps: TELESCOPE_TEXT_MOTION.clearProps,
         },
       );
     });

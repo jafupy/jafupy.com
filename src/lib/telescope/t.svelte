@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { untrack } from "svelte";
   import type { Snippet } from "svelte";
   import { setTelescopeContext } from "./telescope-context.svelte";
 
@@ -8,13 +9,13 @@
     class?: string;
   };
 
-  let {
+  const {
     children,
     defaultOpen = false,
     class: className = "",
   }: Props = $props();
 
-  let open = $state(defaultOpen);
+  let open = $state(untrack(() => Boolean(defaultOpen)));
 
   setTelescopeContext({
     getOpen: () => open,

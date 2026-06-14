@@ -2,6 +2,7 @@
   import { gsap } from "gsap";
   import type { Snippet } from "svelte";
   import { tick } from "svelte";
+  import { prefersReducedMotion, TELESCOPE_TEXT_MOTION } from "./motion";
   import { getTelescopeContext } from "./telescope-context.svelte";
   import { splitOwnText, type TextSplit } from "./text-split";
 
@@ -14,7 +15,7 @@
 
   const telescope = getTelescopeContext();
 
-  let node: HTMLSpanElement;
+  let node = $state<HTMLSpanElement | null>(null);
   let visible = $state(!telescope.getOpen());
   let tween: gsap.core.Tween | null = null;
   let split: TextSplit | null = null;
@@ -55,6 +56,11 @@
     await tick();
     if (!visible || tween || !node.isConnected) return;
 
+    if (prefersReducedMotion()) {
+      visible = false;
+      return;
+    }
+
     const rect = node.getBoundingClientRect();
 
     node.style.position = "absolute";
@@ -72,15 +78,6 @@
       return;
     }
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      gsap.set(split.chars, { clearProps: "all" });
-      split.revert();
-      split = null;
-      clearInlineAnimationStyles(node);
-      visible = false;
-      return;
-    }
-
     tween = gsap.fromTo(
       split.chars,
       {
@@ -89,12 +86,13 @@
         filter: "blur(0px)",
       },
       {
-        y: "-0.45em",
+        y: `-${TELESCOPE_TEXT_MOTION.y}`,
         opacity: 0,
-        filter: "blur(5px)",
-        duration: 0.34,
-        ease: "power3.in",
-        stagger: 0.006,
+        filter: TELESCOPE_TEXT_MOTION.blur,
+        duration: TELESCOPE_TEXT_MOTION.duration,
+        ease: TELESCOPE_TEXT_MOTION.easeIn,
+        stagger: TELESCOPE_TEXT_MOTION.stagger,
+        clearProps: TELESCOPE_TEXT_MOTION.clearProps,
         onComplete: () => {
           split?.revert();
           split = null;
