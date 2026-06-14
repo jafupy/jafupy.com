@@ -2,6 +2,7 @@
   import { onDestroy, onMount } from "svelte";
   import "@fontsource-variable/jetbrains-mono";
   import "@xterm/xterm/css/xterm.css";
+  import { centerLine, renderScreen } from "./terminal";
 
   type EmulatorApp = { stop: () => void };
   type EmulatorName = "snake" | "tetris";
@@ -39,12 +40,6 @@
     window.history.replaceState({}, "", url);
   }
 
-  function centerLine(text: string, width: number) {
-    if (text.length >= width) return text.slice(0, width);
-    const left = Math.floor((width - text.length) / 2);
-    return `${" ".repeat(left)}${text}${" ".repeat(width - text.length - left)}`;
-  }
-
   function renderMenu() {
     if (!terminal || app) return;
 
@@ -80,16 +75,7 @@
       ),
     ];
 
-    const topPad = Math.max(Math.floor((terminal.rows - lines.length) / 2), 0);
-    const frame = Array.from({ length: Math.max(terminal.rows, 1) }, () =>
-      " ".repeat(Math.max(terminal.cols, 1)),
-    );
-
-    for (let i = 0; i < lines.length && i + topPad < frame.length; i++) {
-      frame[i + topPad] = lines[i];
-    }
-
-    terminal.write("\x1b[2J\x1b[H\x1b[?25l" + frame.join("\r\n"));
+    renderScreen(terminal, lines, { hideCursor: true });
   }
 
   function attachMenuKeys() {

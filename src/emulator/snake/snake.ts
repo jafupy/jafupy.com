@@ -1,4 +1,5 @@
 import type { Terminal } from "@xterm/xterm";
+import { centerLine, renderScreen } from "../terminal";
 
 const GREEN = "\x1b[32m";
 const RED = "\x1b[31m";
@@ -21,30 +22,6 @@ type SnakeTerminal = Pick<
   Terminal,
   "cols" | "rows" | "write" | "clear" | "onKey" | "onResize"
 >;
-
-function padLine(text: string, width: number) {
-  if (text.length >= width) return text.slice(0, width);
-  return text + " ".repeat(width - text.length);
-}
-
-function centerLine(text: string, width: number) {
-  if (text.length >= width) return text.slice(0, width);
-  const left = Math.floor((width - text.length) / 2);
-  return `${" ".repeat(left)}${text}${" ".repeat(width - text.length - left)}`;
-}
-
-function renderScreen(terminal: SnakeTerminal, lines: string[]) {
-  const width = Math.max(terminal.cols, 1);
-  const height = Math.max(terminal.rows, 1);
-  const topPad = Math.max(Math.floor((height - lines.length) / 2), 0);
-  const frame = Array.from({ length: height }, () => " ".repeat(width));
-
-  for (let i = 0; i < lines.length && i + topPad < height; i++) {
-    frame[i + topPad] = padLine(lines[i], width);
-  }
-
-  terminal.write("\x1b[2J\x1b[H" + frame.join("\r\n"));
-}
 
 function buildMenuScreen(terminal: SnakeTerminal) {
   const width = Math.max(terminal.cols, 1);

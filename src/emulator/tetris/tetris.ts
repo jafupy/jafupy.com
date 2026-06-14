@@ -1,4 +1,5 @@
 import type { Terminal } from "@xterm/xterm";
+import { centerLine, padAnsi, renderScreen, visibleLength } from "../terminal";
 
 const RESET = "\x1b[0m";
 const BLOCK = "███";
@@ -220,35 +221,6 @@ const PIECES: Record<PieceId, Shape[]> = {
     ],
   ],
 };
-
-function centerLine(text: string, width: number) {
-  if (text.length >= width) return text.slice(0, width);
-  const left = Math.floor((width - text.length) / 2);
-  return `${" ".repeat(left)}${text}${" ".repeat(width - text.length - left)}`;
-}
-
-function visibleLength(text: string) {
-  return text.replace(/\x1b\[[0-9;]*m/g, "").length;
-}
-
-function padAnsi(text: string, width: number) {
-  const len = visibleLength(text);
-  if (len >= width) return text;
-  return text + " ".repeat(width - len);
-}
-
-function renderScreen(terminal: TetrisTerminal, lines: string[]) {
-  const width = Math.max(terminal.cols, 1);
-  const height = Math.max(terminal.rows, 1);
-  const topPad = Math.max(Math.floor((height - lines.length) / 2), 0);
-  const frame = Array.from({ length: height }, () => " ".repeat(width));
-
-  for (let i = 0; i < lines.length && i + topPad < height; i++) {
-    frame[i + topPad] = lines[i];
-  }
-
-  terminal.write("\x1b[2J\x1b[H" + frame.join("\r\n"));
-}
 
 function emptyBoard(): Board {
   return Array.from({ length: BOARD_HEIGHT }, () => Array(BOARD_WIDTH).fill(0));
