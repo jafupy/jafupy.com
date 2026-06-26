@@ -5,7 +5,7 @@
   import { centerLine, renderScreen } from "./terminal";
 
   type EmulatorApp = { stop: () => void };
-  type EmulatorName = "snake" | "tetris";
+  type EmulatorName = "snake" | "tetris" | "robbo";
   type TerminalLike = import("@xterm/xterm").Terminal;
   const RESET = "\x1b[0m";
   const BRIGHT = "\x1b[97m";
@@ -25,6 +25,7 @@
     const params = new URLSearchParams(window.location.search);
     if (params.has("snake")) return "snake";
     if (params.has("tetris")) return "tetris";
+    if (params.has("robbo")) return "robbo";
     return null;
   }
 
@@ -68,6 +69,7 @@
       "",
       renderOption("Snake", "S", selection === "snake"),
       renderOption("Tetris", "T", selection === "tetris"),
+      renderOption("Robbo", "R", selection === "robbo"),
       "",
       centerLine(
         `${MUTED}[Arrow Keys] Select   [Enter] Launch${RESET}`,
@@ -86,13 +88,23 @@
       const key = domEvent.key.toLowerCase();
 
       if (key === "arrowup" || key === "arrowleft") {
-        selection = "snake";
+        selection =
+          selection === "robbo"
+            ? "tetris"
+            : selection === "tetris"
+              ? "snake"
+              : "robbo";
         renderMenu();
         return;
       }
 
       if (key === "arrowdown" || key === "arrowright") {
-        selection = "tetris";
+        selection =
+          selection === "snake"
+            ? "tetris"
+            : selection === "tetris"
+              ? "robbo"
+              : "snake";
         renderMenu();
         return;
       }
@@ -105,6 +117,12 @@
 
       if (key === "t") {
         selection = "tetris";
+        renderMenu();
+        return;
+      }
+
+      if (key === "r") {
+        selection = "robbo";
         renderMenu();
         return;
       }
@@ -144,6 +162,19 @@
         onExit: exitToRoot,
         onStateChange: (mode) => {
           showBackButton = mode === "dead";
+        },
+      });
+      return;
+    }
+
+    if (selection === "robbo") {
+      const { startRobboApp } = await import("./robbo/robbo.ts");
+      app = startRobboApp(terminal, {
+        directStart: true,
+        paused: true,
+        onExit: exitToRoot,
+        onStateChange: (mode) => {
+          showBackButton = mode === "dead" || mode === "won";
         },
       });
       return;
@@ -236,7 +267,7 @@
       >back</button
     >
   {/if}
-  <div bind:this={container} class="emulator-terminal h-full w-full" />
+  <div bind:this={container} class="emulator-terminal h-full w-full"></div>
 </div>
 
 <style>

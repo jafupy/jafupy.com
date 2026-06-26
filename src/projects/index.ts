@@ -15,4 +15,9 @@ export const projects: Project[] = [
     description: "A terminal tetris build running inside the emulator.",
     href: "/emulator?tetris",
   },
+  {
+    title: "Robbo",
+    description: "A retro terminal puzzle minigame running inside the emulator.",
+    href: "/emulator?robbo",
+  },
 ];
