@@ -7,9 +7,17 @@ const GREEN_BG = "\x1b[42m";
 const RED_BG = "\x1b[41m";
 const RESET = "\x1b[0m";
 const HALF = [" ", "▄", "▀", "█"]; // none, bottom, top, both
+const EDGE_SHADE_FG = [
+  "\x1b[38;2;166;172;205m",
+  "\x1b[38;2;142;148;180m",
+  "\x1b[38;2;118;124;147m",
+  "\x1b[38;2;98;104;130m",
+  "\x1b[38;2;79;85;112m",
+];
+const EDGE_RADIUS = 15;
 const SAVE_KEY = "snake_save";
-const OUTER_PADDING_X = 10;
-const OUTER_PADDING_Y = 3;
+const OUTER_PADDING_X = 2;
+const OUTER_PADDING_Y = 1;
 
 interface SaveState {
   snake: { x: number; y: number }[];
@@ -71,6 +79,25 @@ function renderMixedCell(topVal: number, botVal: number) {
   return `${bottom!.fg}${HALF[1]}${RESET}`;
 }
 
+function shadeLevelForDistance(distance: number) {
+  if (distance <= 3) return 0;
+  if (distance <= 6) return 1;
+  if (distance <= 9) return 2;
+  if (distance <= 12) return 3;
+  if (distance <= EDGE_RADIUS) return 4;
+  return -1;
+}
+
+function renderHalfShade(level: number, half: "top" | "bottom") {
+  if (level < 0) return " ";
+  return `${EDGE_SHADE_FG[level]}${half === "top" ? "▀" : "▄"}${RESET}`;
+}
+
+function renderFullShade(level: number) {
+  if (level < 0) return " ";
+  return `${EDGE_SHADE_FG[level]}█${RESET}`;
+}
+
 function startGame(
   terminal: Terminal,
   onDeath: (score: number) => void,
@@ -79,25 +106,22 @@ function startGame(
   function getDims() {
     const padX = Math.min(
       OUTER_PADDING_X,
-      Math.max(Math.floor((terminal.cols - 6) / 2), 0),
+      Math.max(Math.floor((terminal.cols - 4) / 2), 0),
     );
-    const maxInnerCols = Math.max(terminal.cols - padX * 2 - 2, 4);
+    const maxInnerCols = Math.max(terminal.cols - padX * 2, 4);
 
     const preferredPadY = Math.min(
       OUTER_PADDING_Y,
-      Math.max(Math.floor((terminal.rows - 8) / 2), 0),
+      Math.max(Math.floor((terminal.rows - 4) / 2), 0),
     );
-    const maxInnerRows = Math.max(terminal.rows - preferredPadY * 2 - 3, 4);
+    const maxInnerRows = Math.max(terminal.rows - preferredPadY * 2 - 1, 4);
 
     const tcols = maxInnerCols;
     const trows = maxInnerRows;
     const pwidth = tcols;
     const pheight = trows * 2;
-    const contentHeight = trows + 3;
-    const remainingRows = Math.max(terminal.rows - contentHeight, 0);
-    const centeredTop = Math.floor(remainingRows / 2);
-    const padTop = Math.min(centeredTop + 1, remainingRows);
-    const padBottom = remainingRows - padTop;
+    const padTop = preferredPadY;
+    const padBottom = preferredPadY;
 
     return { tcols, trows, pwidth, pheight, padX, padTop, padBottom };
   }
@@ -207,6 +231,26 @@ function startGame(
     ({ tcols, trows, pwidth, pheight, padX, padTop, padBottom } = getDims());
     const gutter = " ".repeat(padX);
 
+    function closestSnakeDistance(x: number, y: number) {
+      let closest = Infinity;
+      for (const segment of snake) {
+        closest = Math.min(closest, Math.hypot(x - segment.x, y - segment.y));
+      }
+      return closest;
+    }
+
+    function shadeLevelAt(x: number, y: number) {
+      return shadeLevelForDistance(closestSnakeDistance(x, y));
+    }
+
+    function renderSideShade(x: number, y: number) {
+      const levels = [shadeLevelAt(x, y), shadeLevelAt(x, y + 1)].filter(
+        (level) => level >= 0,
+      );
+      const level = levels.length ? Math.min(...levels) : -1;
+      return renderFullShade(level);
+    }
+
     const grid = new Uint8Array(pwidth * pheight);
     for (let i = snake.length - 1; i >= 0; i--) {
       const { x, y } = snake[i];
@@ -216,11 +260,20 @@ function startGame(
     if (food.x < pwidth && food.y < pheight) grid[food.y * pwidth + food.x] = 3;
 
     const lines: string[] = [];
-    for (let i = 0; i < padTop; i++) lines.push("");
-    lines.push(`${gutter}┌${"─".repeat(tcols)}┐`);
+    for (let i = 0; i < padTop; i++) {
+      let line = "";
+      for (let tx = -padX; tx < pwidth + padX; tx++) {
+        const isOuterPad = tx === -padX || tx === pwidth + padX - 1;
+        line += isOuterPad
+          ? " "
+          : renderHalfShade(shadeLevelAt(tx, -1), "bottom");
+      }
+      lines.push(line);
+    }
 
     for (let ty = 0; ty < trows; ty++) {
-      let line = `${gutter}│`;
+      const y = ty * 2;
+      let line = `${padX > 1 ? " " : ""}${renderSideShade(-1, y)}`;
       for (let tx = 0; tx < tcols; tx++) {
         const topVal = ty * 2 < pheight ? grid[ty * 2 * pwidth + tx] : 0;
         const botVal =
@@ -230,17 +283,25 @@ function startGame(
         const visibleBottom = botVal === 2 && !blinkState ? 0 : botVal;
         line += renderMixedCell(visibleTop, visibleBottom);
       }
-      line += "│";
+      line += `${renderSideShade(pwidth, y)}${padX > 1 ? " " : ""}`;
       lines.push(line);
     }
 
-    lines.push(`${gutter}└${"─".repeat(tcols)}┘`);
+    for (let i = 0; i < padBottom; i++) {
+      let line = "";
+      for (let tx = -padX; tx < pwidth + padX; tx++) {
+        const isOuterPad = tx === -padX || tx === pwidth + padX - 1;
+        line += isOuterPad
+          ? " "
+          : renderHalfShade(shadeLevelAt(tx, pheight), "top");
+      }
+      lines.push(line);
+    }
 
     const hasSave = !!localStorage.getItem(SAVE_KEY);
     lines.push(
       `${gutter}Score: ${score}  [WASD/Arrows] [Space: Pause] [F: Save]${hasSave ? " [L: Load]" : ""} [Esc: Back]`,
     );
-    for (let i = 0; i < padBottom; i++) lines.push("");
 
     return lines;
   }
@@ -248,7 +309,10 @@ function startGame(
   function draw() {
     const lines = buildFrame();
     if (prevLines.length === 0) {
-      terminal.write("\x1b[H" + lines.join("\r\n"));
+      terminal.write(
+        "\x1b[H" +
+          lines.map((line, i) => `\x1b[${i + 1};1H${line}\x1b[K`).join(""),
+      );
     } else {
       const maxLines = Math.max(lines.length, prevLines.length);
       for (let i = 0; i < maxLines; i++) {
