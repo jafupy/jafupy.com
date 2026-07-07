@@ -26,3 +26,6 @@ pnpm-debug.log*
 
 # git worktrees
 .worktrees/
+
+# local blog drafts
+src/content/blog/.drafts/
