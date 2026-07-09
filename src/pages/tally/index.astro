@@ -7,7 +7,7 @@ import SeoHead from "$/components/seo-head.astro";
 
 import "$/styles/global.css";
 
-const installCommand = `curl -fsSL https://jafupy.github.io/tally/install.sh | sh
+const installCommand = `curl -fsSL https://jafupy.com/tally.sh | sh
 tally .`;
 ---
 
@@ -94,8 +94,7 @@ Total       16  2407   403       6 1998</code></pre>
         </div>
 
         <p class="mb-0">
-          Builds from source, installs to <code>~/.local/bin</code>, and removes the temporary
-          checkout.
+          Downloads the latest release and installs it to <code>~/.local/bin</code>.
         </p>
         <p class="mb-0 mt-[0.85em]">
           <a
