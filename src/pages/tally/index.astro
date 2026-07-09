@@ -6,13 +6,10 @@ import { CopyIcon } from "@lucide/svelte";
 import SeoHead from "$/components/seo-head.astro";
 
 import "$/styles/global.css";
-
-const installCommand = `curl -fsSL https://jafupy.com/tally.sh | sh
-tally .`;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" class="scroll-smooth [color-scheme:light_dark]">
   <head>
     <meta charset="UTF-8" />
     <meta
@@ -21,41 +18,40 @@ tally .`;
     />
     <SeoHead
       title="Tally"
-      description="Tally is a fast, over-optimized cloc-style counter for codebases."
+      description="Tally is a fast, over-optimized line counter for codebases."
     />
   </head>
   <body
-    class="min-w-[320px] min-h-screen bg-[var(--page-bg)] text-[var(--body-text)] font-sans antialiased"
+    class="min-w-[320px] min-h-screen bg-mauve-50 dark:bg-mauve-950 text-mauve-800 dark:text-mauve-300 font-sans antialiased"
   >
     <main
       class="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-6 py-8 sm:px-8 sm:py-12"
     >
       <header class="mb-14 flex items-center justify-between gap-6 text-sm">
         <a
-          class="text-xl font-semibold text-[var(--heading-text)] no-underline"
+          class="text-xl font-semibold text-mauve-950 dark:text-mauve-100 no-underline"
           href="/tally/">Tally</a
         >
-        <nav class="flex gap-5 text-[var(--muted-text)]">
-          <a href="#install">Install</a>
-          <a href="https://github.com/jafupy/tally">GitHub</a>
+        <nav class="flex gap-5 text-mauve-600 dark:text-mauve-400">
+          <a href="#install" class="underline-offset-2">Install</a>
+          <a href="https://github.com/jafupy/tally" class="underline-offset-2">GitHub</a>
         </nav>
       </header>
 
       <section
-        class="tally-copy max-w-none text-[var(--body-text)] leading-[1.7] [container-type:inline-size]"
+        class="max-w-none leading-[1.7] [container-type:inline-size]"
       >
         <h1
-          class="mb-[0.45em] mt-[0.6em] font-serif text-[clamp(1.65rem,1.45rem+0.95vw,1.934rem)] font-semibold leading-[1.15] text-[var(--heading-text)]"
+          class="mb-[0.45em] mt-[0.6em] font-serif text-[clamp(1.65rem,1.45rem+0.95vw,1.934rem)] font-semibold leading-[1.15] text-mauve-950 dark:text-mauve-100"
         >
-          An over-optimized cloc clone.
+          A line counter for codebases.
         </h1>
         <p class="mb-0">
-          Tally counts files, lines, blanks, comments, and code. It walks a tree, guesses the
-          language, prints a table, and stops.
+          Tally counts files, lines, blanks, comments, and code, sorted by language.
         </p>
 
         <pre
-          class="tally-preview my-5 overflow-x-auto rounded-lg border border-[color-mix(in_oklch,var(--heading-text)_10%,transparent)] bg-[var(--pre-bg)] p-4 font-mono leading-[1.7]"
+          class="my-5 overflow-x-auto rounded-lg border border-mauve-950/10 dark:border-mauve-100/10 bg-mauve-100 dark:bg-mauve-900 p-4 font-mono leading-[1.7] text-[min(0.875rem,calc((87.5cqw-2rem)/25))]"
         ><code>$ tally .
 Language Files Lines Blank Comment Code
 -------- ----- ----- ----- ------- ----
@@ -67,19 +63,20 @@ Total       16  2407   403       6 1998</code></pre>
 
         <h2
           id="install"
-          class="mb-[0.45em] mt-[0.8em] font-serif text-[clamp(1.5rem,1.34rem+0.75vw,1.695rem)] font-normal leading-[1.2] text-[var(--heading-text)]"
+          class="mb-[0.45em] mt-[0.8em] font-serif text-[clamp(1.5rem,1.34rem+0.75vw,1.695rem)] font-normal leading-[1.2] text-mauve-950 dark:text-mauve-100"
         >
           Install
         </h2>
         <div
-          class="my-5 overflow-hidden rounded-lg border border-[var(--card-border)] bg-[var(--card-bg)]"
+          id="install-box"
+          class="my-5 overflow-hidden rounded-lg border border-mauve-300 dark:border-mauve-700 bg-mauve-50 dark:bg-mauve-900 ring-0 ring-blue-400 dark:ring-blue-600 transition-shadow duration-300"
         >
           <div
-            class="flex min-h-11 items-center justify-between gap-4 border-b border-[var(--card-border)] py-2 pl-4 pr-2 text-sm leading-none text-[var(--muted-text)]"
+            class="flex min-h-11 items-center justify-between gap-4 border-b border-mauve-300 dark:border-mauve-700 py-2 pl-4 pr-2 text-sm leading-none text-mauve-600 dark:text-mauve-400"
           >
             <span>Shell</span>
             <button
-              class="inline-flex h-8 min-w-23 cursor-pointer items-center justify-center gap-1.5 rounded-md bg-[var(--button-bg)] text-sm font-medium leading-none text-[var(--heading-text)] hover:bg-[var(--button-hover-bg)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-old-rose data-[copied=true]:text-old-rose"
+              class="inline-flex h-8 min-w-23 cursor-pointer items-center justify-center gap-1.5 rounded-md bg-mauve-100 dark:bg-mauve-800 text-sm font-medium leading-none text-mauve-950 dark:text-mauve-100 hover:bg-mauve-200 dark:hover:bg-mauve-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-old-rose data-[copied=true]:text-old-rose"
               type="button"
               data-copy-install
               aria-label="Copy install command"
@@ -89,12 +86,16 @@ Total       16  2407   403       6 1998</code></pre>
             </button>
           </div>
           <pre
-            class="m-0 overflow-x-auto bg-transparent p-4 font-mono text-sm leading-[1.7] text-[var(--heading-text)]"
-          ><code data-install-command>{installCommand}</code></pre>
+            class="m-0 overflow-x-auto bg-transparent p-4 font-mono text-sm leading-[1.7] text-mauve-950 dark:text-mauve-100"
+          ><code data-install-command><span class="text-emerald-600 dark:text-emerald-400">curl</span> -fsSL https://jafupy.com/tally.sh | <span class="text-emerald-600 dark:text-emerald-400">sh</span>
+<span class="text-emerald-600 dark:text-emerald-400">tally</span> .</code></pre>
         </div>
 
         <p class="mb-0">
-          Downloads the latest release and installs it to <code>~/.local/bin</code>.
+          Installs to <code
+            class="rounded-sm bg-mauve-100 dark:bg-mauve-800 px-1 py-0.5 font-mono text-sm"
+            >~/.local/bin</code
+          >.
         </p>
         <p class="mb-0 mt-[0.85em]">
           <a
@@ -104,8 +105,8 @@ Total       16  2407   403       6 1998</code></pre>
         </p>
       </section>
 
-      <footer class="mt-auto pt-16 text-sm text-[var(--muted-text)]">
-        <p>GPL-3.0-or-later. Counts lines. Tries very hard.</p>
+      <footer class="mt-auto pt-16 text-sm text-mauve-600 dark:text-mauve-400">
+        <p>GPL-3.0-or-later. Counts faster than anyone asked it to.</p>
       </footer>
     </main>
 
@@ -113,6 +114,8 @@ Total       16  2407   403       6 1998</code></pre>
       const button = document.querySelector("[data-copy-install]");
       const command = document.querySelector("[data-install-command]");
       const label = button?.querySelector(".copy-label");
+      const installLink = document.querySelector('a[href="#install"]');
+      const installBox = document.querySelector<HTMLElement>("#install-box");
 
       const copyText = async (text: string) => {
         if (navigator.clipboard) {
@@ -143,58 +146,22 @@ Total       16  2407   403       6 1998</code></pre>
           delete button.dataset.copied;
         }, 1600);
       });
+
+      const highlightInstallBox = () => {
+        if (!installBox) return;
+        installBox.classList.add("ring-4");
+        window.setTimeout(() => {
+          installBox.classList.remove("ring-4");
+        }, 1200);
+      };
+
+      installLink?.addEventListener("click", () => {
+        window.setTimeout(highlightInstallBox, 400);
+      });
+
+      if (window.location.hash === "#install") {
+        highlightInstallBox();
+      }
     </script>
   </body>
 </html>
-
-<style>
-  :root {
-    --page-bg: var(--color-mauve-50);
-    --body-text: var(--color-mauve-800);
-    --heading-text: var(--color-mauve-950);
-    --muted-text: var(--color-mauve-600);
-    --inline-code-bg: var(--color-mauve-100);
-    --pre-bg: var(--color-mauve-100);
-    --card-bg: var(--color-mauve-50);
-    --card-border: var(--color-mauve-300);
-    --button-bg: var(--color-mauve-100);
-    --button-hover-bg: var(--color-mauve-200);
-  }
-
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --page-bg: var(--color-mauve-950);
-      --body-text: var(--color-mauve-300);
-      --heading-text: var(--color-mauve-100);
-      --muted-text: var(--color-mauve-400);
-      --inline-code-bg: var(--color-mauve-800);
-      --pre-bg: var(--color-mauve-900);
-      --card-bg: var(--color-mauve-900);
-      --card-border: var(--color-mauve-700);
-      --button-bg: var(--color-mauve-800);
-      --button-hover-bg: var(--color-mauve-700);
-    }
-  }
-
-  html {
-    color-scheme: light dark;
-    scroll-behavior: smooth;
-  }
-
-  a {
-    text-underline-offset: 2px;
-  }
-
-  :global(.tally-copy code:not(pre *)) {
-    background-color: var(--inline-code-bg);
-    border-radius: var(--radius-sm);
-    font-family: var(--font-mono);
-    font-size: 0.875rem;
-    padding: 2px 4px;
-  }
-
-  .tally-preview {
-    font-size: min(1rem, calc((100vw - 3rem) / 25));
-    font-size: min(1rem, calc((100cqw - 2rem) / 25));
-  }
-</style>
