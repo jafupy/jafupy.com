@@ -1,9 +1,35 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { T, TCollapsed, TOpen, TTrigger } from "$/lib/telescope";
   import { getDateDelta } from "$/lib/date";
 
   const birthday = new Date(2010, 0, 12, 23, 0, 0);
-  const age = getDateDelta(birthday);
+  let age = $state(getDateDelta(birthday));
+
+  onMount(() => {
+    let timeout: ReturnType<typeof setTimeout>;
+
+    function scheduleUpdate() {
+      const now = new Date();
+      const nextUpdate = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        23,
+      );
+
+      if (nextUpdate <= now) nextUpdate.setDate(nextUpdate.getDate() + 1);
+
+      timeout = setTimeout(() => {
+        age = getDateDelta(birthday);
+        scheduleUpdate();
+      }, nextUpdate.getTime() - now.getTime());
+    }
+
+    scheduleUpdate();
+
+    return () => clearTimeout(timeout);
+  });
 </script>
 
 <T>

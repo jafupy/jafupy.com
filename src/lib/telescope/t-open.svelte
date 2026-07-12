@@ -53,6 +53,11 @@
           ease: TELESCOPE_TEXT_MOTION.easeOut,
           stagger: TELESCOPE_TEXT_MOTION.stagger,
           clearProps: TELESCOPE_TEXT_MOTION.clearProps,
+          onComplete: () => {
+            split?.revert();
+            split = null;
+            tween = null;
+          },
         },
       );
     });

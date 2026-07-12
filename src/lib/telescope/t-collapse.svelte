@@ -19,27 +19,29 @@
   let visible = $state(!telescope.getOpen());
   let tween: gsap.core.Tween | null = null;
   let split: TextSplit | null = null;
+  let animationVersion = 0;
 
   $effect(() => {
     const open = telescope.getOpen();
-
-    if (!node) return;
+    const version = ++animationVersion;
+    const currentNode = node;
 
     if (open) {
-      animateOut(node);
+      if (currentNode) animateOut(currentNode, version);
     } else {
       tween?.kill();
       split?.revert();
       tween = null;
       split = null;
-      clearInlineAnimationStyles(node);
+      if (currentNode) clearInlineAnimationStyles(currentNode);
       visible = true;
     }
 
     return () => {
+      animationVersion += 1;
       tween?.kill();
       split?.revert();
-      if (node) clearInlineAnimationStyles(node);
+      if (currentNode) clearInlineAnimationStyles(currentNode);
     };
   });
 
@@ -50,11 +52,16 @@
     node.style.zIndex = "";
   }
 
-  async function animateOut(node: HTMLElement) {
-    if (!visible || tween) return;
+  async function animateOut(node: HTMLElement, version: number) {
+    if (!visible || tween || version !== animationVersion) return;
 
     await tick();
-    if (!visible || tween || !node.isConnected) return;
+    if (
+      !visible ||
+      tween ||
+      !node.isConnected ||
+      version !== animationVersion
+    ) return;
 
     if (prefersReducedMotion()) {
       visible = false;
@@ -94,6 +101,7 @@
         stagger: TELESCOPE_TEXT_MOTION.stagger,
         clearProps: TELESCOPE_TEXT_MOTION.clearProps,
         onComplete: () => {
+          if (version !== animationVersion) return;
           split?.revert();
           split = null;
           tween = null;

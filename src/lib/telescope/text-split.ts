@@ -5,6 +5,9 @@ export type TextSplit = {
 
 const WORD_CLASS = "inline-block whitespace-nowrap";
 const CHAR_CLASS = "inline-block will-change-[transform,opacity,filter]";
+const graphemeSegmenter = new Intl.Segmenter(undefined, {
+  granularity: "grapheme",
+});
 
 function isInsideNestedTelescope(node: Node, root: HTMLElement) {
   let current = node.parentElement;
@@ -28,7 +31,7 @@ function makeWordSpan(word: string, chars: HTMLElement[]) {
   const span = document.createElement("span");
   span.className = WORD_CLASS;
 
-  for (const char of Array.from(word)) {
+  for (const { segment: char } of graphemeSegmenter.segment(word)) {
     const charSpan = makeCharSpan(char);
     chars.push(charSpan);
     span.appendChild(charSpan);
