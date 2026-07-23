@@ -29,6 +29,14 @@ const COMPATIBILITY_PATCHES = new Map([
     "    Install_Algorithm_Diff();",
     "    $HAVE_Algorithm_Diff = 0;",
   ],
+  [
+    "            alarm $max_duration_sec;",
+    "            # alarm unavailable under WASI",
+  ],
+  [
+    "            alarm 0;",
+    "            # alarm unavailable under WASI",
+  ],
 ]);
 
 function patchForZeroPerl(source: string) {
