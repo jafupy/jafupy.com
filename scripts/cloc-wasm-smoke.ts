@@ -21,7 +21,7 @@ const clocSource = (await clocResponse.text())
     "    Install_Algorithm_Diff();",
     "    $HAVE_Algorithm_Diff = 0;",
   );
-const fileSystem = new MemoryFileSystem();
+const fileSystem = new MemoryFileSystem({ "/": "" });
 fileSystem.addFile("/cloc", clocSource);
 fileSystem.addFile(
   "/repo/src/main.rs",
