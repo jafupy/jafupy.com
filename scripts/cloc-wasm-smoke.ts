@@ -17,9 +17,9 @@ const clocSource = (await clocResponse.text())
     "use Encode;",
     "# Encode unavailable under ZeroPerl; PAR::Packer workaround disabled.",
   )
-  .replaceAll(
-    "tempdir( CLEANUP => 1 )",
-    "do { my $d = '/repo/.cloc-tmp'; File::Path::mkpath($d) unless -d $d; $d }",
+  .replace(
+    "else { Install_Algorithm_Diff(); }",
+    "else { $HAVE_Algorithm_Diff = 0; }",
   );
 const fileSystem = new MemoryFileSystem();
 fileSystem.addFile("/cloc", clocSource);
