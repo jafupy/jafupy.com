@@ -26,8 +26,8 @@ const COMPATIBILITY_PATCHES = new Map([
     "# Encode unavailable under ZeroPerl; the PAR::Packer workaround is irrelevant here.",
   ],
   [
-    "tempdir( CLEANUP => 1 )",
-    "do { my $d = '/repo/.cloc-tmp'; File::Path::mkpath($d) unless -d $d; $d }",
+    "else { Install_Algorithm_Diff(); }",
+    "else { $HAVE_Algorithm_Diff = 0; }",
   ],
 ]);
 
