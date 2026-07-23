@@ -2,7 +2,10 @@ import type { APIRoute } from "astro";
 
 const MAX_RUNTIME_BYTES = 32 * 1024 * 1024;
 const RUNTIME_URL =
-  "https://raw.githubusercontent.com/jafupy/tally/browser-runtime/tally.wasm";
+  import.meta.env.TALLY_RUNTIME_URL ??
+  "https://assets.jafupy.com/tally/tally.wasm";
+
+export const prerender = true;
 
 async function readLimited(response: Response, maximum: number) {
   const declared = Number(response.headers.get("content-length"));
@@ -45,25 +48,18 @@ export const GET: APIRoute = async () => {
   });
 
   if (!upstream.ok) {
-    return new Response(
-      "The browser runtime has not been published yet. Run the Tally release workflow first.",
-      { status: 503 },
+    throw new Error(
+      `Could not fetch the Tally browser runtime: ${upstream.status} ${upstream.statusText}`,
     );
   }
 
-  try {
-    const binary = await readLimited(upstream, MAX_RUNTIME_BYTES);
-    return new Response(binary, {
-      headers: {
-        "Content-Type": "application/wasm",
-        "Content-Length": String(binary.byteLength),
-        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
-        "Cross-Origin-Resource-Policy": "same-origin",
-      },
-    });
-  } catch (error) {
-    return new Response(error instanceof Error ? error.message : String(error), {
-      status: 502,
-    });
-  }
+  const binary = await readLimited(upstream, MAX_RUNTIME_BYTES);
+  return new Response(binary, {
+    headers: {
+      "Content-Type": "application/wasm",
+      "Content-Length": String(binary.byteLength),
+      "Cache-Control": "public, max-age=300, s-maxage=31536000",
+      "Cross-Origin-Resource-Policy": "same-origin",
+    },
+  });
 };
