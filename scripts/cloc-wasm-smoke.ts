@@ -16,9 +16,12 @@ const clocSource = (await clocResponse.text())
   .replaceAll(
     "use Encode;",
     "# Encode unavailable under ZeroPerl; PAR::Packer workaround disabled.",
+  )
+  .replaceAll(
+    "tempdir( CLEANUP => 1 )",
+    "do { my $d = '/repo/.cloc-tmp'; File::Path::mkpath($d) unless -d $d; $d }",
   );
 const fileSystem = new MemoryFileSystem();
-fileSystem.addFile("/tmp/.keep", "");
 fileSystem.addFile("/cloc", clocSource);
 fileSystem.addFile(
   "/repo/src/main.rs",
@@ -37,11 +40,6 @@ const decode = (value: string | Uint8Array) =>
 
 const perl = await ZeroPerl.create({
   fileSystem,
-  env: {
-    TMPDIR: "/tmp",
-    TEMP: "/tmp",
-    TMP: "/tmp",
-  },
   stdout: (value) => {
     stdout += decode(value);
   },
