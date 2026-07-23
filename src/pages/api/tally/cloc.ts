@@ -37,6 +37,18 @@ const COMPATIBILITY_PATCHES = new Map([
     "            alarm 0;",
     "            # alarm unavailable under WASI",
   ],
+  [
+    "        $dir = tempdir( CLEANUP => 1 );  # 1 = delete on exit",
+    "        $dir = '/cloc-runtime';",
+  ],
+  [
+    "    mkdir $Regexp_dir       ;",
+    "    # pre-created by the browser runtime",
+  ],
+  [
+    "    mkdir $Regexp_Common_dir;",
+    "    # pre-created by the browser runtime",
+  ],
 ]);
 
 function patchForZeroPerl(source: string) {
