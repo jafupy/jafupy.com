@@ -40,6 +40,11 @@ const decode = (value: string | Uint8Array) =>
 
 const perl = await ZeroPerl.create({
   fileSystem,
+  env: {
+    TMPDIR: "/repo",
+    TEMP: "/repo",
+    TMP: "/repo",
+  },
   stdout: (value) => {
     stdout += decode(value);
   },
