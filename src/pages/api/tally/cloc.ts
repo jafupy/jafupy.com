@@ -21,6 +21,10 @@ const COMPATIBILITY_PATCHES = new Map([
       "sub strftime { return ''; }",
     ].join("\n"),
   ],
+  [
+    "use Encode;",
+    "# Encode unavailable under ZeroPerl; the PAR::Packer workaround is irrelevant here.",
+  ],
 ]);
 
 function patchForZeroPerl(source: string) {
@@ -29,7 +33,7 @@ function patchForZeroPerl(source: string) {
     if (!patched.includes(needle)) {
       throw new Error(`Pinned cloc script no longer contains: ${needle}`);
     }
-    patched = patched.replace(needle, replacement);
+    patched = patched.replaceAll(needle, replacement);
   }
   return patched;
 }
