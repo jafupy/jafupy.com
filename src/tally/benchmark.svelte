@@ -5,18 +5,20 @@
   type TerminalLike = import("@xterm/xterm").Terminal;
   type FitAddonLike = import("@xterm/addon-fit").FitAddon;
 
+  type DirectoryLike = {
+    createDir(path: string): Promise<void>;
+    writeFile(path: string, contents: Uint8Array): Promise<void>;
+  };
+
   type WasmerSdk = {
     init: () => Promise<void>;
-    Directory: new () => {
-      createDir(path: string): Promise<void>;
-      writeFile(path: string, contents: Uint8Array): Promise<void>;
-    };
+    Directory: new () => DirectoryLike;
     runWasix: (
-      module: WebAssembly.Module,
+      module: Uint8Array,
       options: {
         program: string;
         args: string[];
-        mount: Record<string, unknown>;
+        mount: Record<string, DirectoryLike>;
       },
     ) => Promise<{
       wait(): Promise<{
@@ -40,8 +42,7 @@
     code: number | null;
   };
 
-  const SDK_URL =
-    "https://unpkg.com/@wasmer/sdk@0.10.0/dist/index.mjs";
+  const SDK_URL = "https://unpkg.com/@wasmer/sdk@0.10.0/dist/index.mjs";
   const MAX_FILES = 60_000;
   const MAX_UNPACKED_BYTES = 300 * 1024 * 1024;
 
@@ -50,8 +51,10 @@
   let terminal: TerminalLike | null = null;
   let fitAddon: FitAddonLike | null = null;
   let resizeObserver: ResizeObserver | null = null;
+  let sdkPromise: Promise<WasmerSdk> | null = null;
   let running = false;
   let status = "Ready";
+  let threads = 1;
   let result: Result | null = null;
 
   const decoder = new TextDecoder();
@@ -135,7 +138,8 @@
       throw new Error("This browser cannot unpack gzip archives.");
     }
 
-    const stream = new Blob([compressed])
+    const compressedBuffer = compressed.slice().buffer;
+    const stream = new Blob([compressedBuffer])
       .stream()
       .pipeThrough(new DecompressionStream("gzip"));
     const tar = new Uint8Array(await new Response(stream).arrayBuffer());
@@ -189,10 +193,7 @@
     return files;
   }
 
-  async function writeArchive(
-    directory: InstanceType<WasmerSdk["Directory"]>,
-    files: ArchiveFile[],
-  ) {
+  async function writeArchive(directory: DirectoryLike, files: ArchiveFile[]) {
     const directories = new Set<string>();
     for (const file of files) {
       const parts = file.path.split("/");
@@ -226,7 +227,8 @@
       .find((candidate) => /^Total\s+/i.test(candidate.trim()));
     if (!total) return { elapsed: 0, files: null, lines: null, code: null };
 
-    const numbers = total.match(/[\d,]+/g)?.map((value) => Number(value.replaceAll(",", ""))) ?? [];
+    const numbers =
+      total.match(/[\d,]+/g)?.map((value) => Number(value.replaceAll(",", ""))) ?? [];
     return {
       elapsed: 0,
       files: numbers[0] ?? null,
@@ -235,10 +237,13 @@
     };
   }
 
-  async function loadSdk(): Promise<WasmerSdk> {
-    const sdk = (await import(/* @vite-ignore */ SDK_URL)) as WasmerSdk;
-    await sdk.init();
-    return sdk;
+  function loadSdk(): Promise<WasmerSdk> {
+    sdkPromise ??= (async () => {
+      const sdk = (await import(/* @vite-ignore */ SDK_URL)) as WasmerSdk;
+      await sdk.init();
+      return sdk;
+    })();
+    return sdkPromise;
   }
 
   async function run() {
@@ -249,7 +254,6 @@
 
     try {
       const repository = normaliseRepository(input);
-      const name = repository.split("/")[1];
 
       if (!window.crossOriginIsolated) {
         throw new Error("The page is not cross-origin isolated; WASIX threads cannot start.");
@@ -280,14 +284,14 @@
       const directory = new sdk.Directory();
       await writeArchive(directory, files);
 
-      status = "Compiling Tally";
-      const module = await WebAssembly.compile(await runtimeResponse.arrayBuffer());
+      status = "Loading Tally";
+      const binary = new Uint8Array(await runtimeResponse.arrayBuffer());
       line();
-      line(`\x1b[38;2;93;228;199m$ tally /repo\x1b[0m`);
+      line("\x1b[38;2;93;228;199m$ tally /repo\x1b[0m");
 
       status = "Counting";
       const started = performance.now();
-      const instance = await sdk.runWasix(module, {
+      const instance = await sdk.runWasix(binary, {
         program: "tally",
         args: ["/repo"],
         mount: { "/repo": directory },
@@ -321,6 +325,7 @@
       import("@xterm/addon-fit"),
     ]);
 
+    threads = Math.min(window.navigator.hardwareConcurrency || 1, 4);
     terminal = new Terminal({
       fontFamily: '"JetBrains Mono Variable", "JetBrains Mono", monospace',
       fontSize: 13,
@@ -372,7 +377,13 @@
 </script>
 
 <div class="overflow-hidden rounded-2xl border border-mauve-950/10 bg-mauve-950 shadow-2xl shadow-mauve-950/15 dark:border-mauve-100/10">
-  <form class="flex flex-col gap-2 border-b border-white/10 p-3 sm:flex-row" onsubmit={(event) => { event.preventDefault(); void run(); }}>
+  <form
+    class="flex flex-col gap-2 border-b border-white/10 p-3 sm:flex-row"
+    onsubmit={(event) => {
+      event.preventDefault();
+      void run();
+    }}
+  >
     <label class="sr-only" for="tally-repository">GitHub repository</label>
     <input
       id="tally-repository"
@@ -392,9 +403,12 @@
     </button>
   </form>
 
-  <div class="flex items-center justify-between border-b border-white/10 px-4 py-2 font-mono text-[11px] text-mauve-400">
+  <div
+    class="flex items-center justify-between border-b border-white/10 px-4 py-2 font-mono text-[11px] text-mauve-400"
+    aria-live="polite"
+  >
     <span>{status}</span>
-    <span>WASIX · {Math.min(navigator?.hardwareConcurrency ?? 1, 4)} threads</span>
+    <span>WASIX · {threads} {threads === 1 ? "thread" : "threads"}</span>
   </div>
 
   <div bind:this={terminalElement} class="h-[24rem] w-full p-4"></div>
