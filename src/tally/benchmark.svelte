@@ -1,5 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
+  import { MemoryFileSystem, ZeroPerl } from "@6over3/zeroperl-ts";
+  import zeroperlUrl from "@6over3/zeroperl-ts/zeroperl.wasm?url";
   import "@xterm/xterm/css/xterm.css";
 
   type TerminalLike = import("@xterm/xterm").Terminal;
@@ -35,11 +37,17 @@
     contents: Uint8Array;
   };
 
-  type Result = {
+  type CountResult = {
     elapsed: number;
     files: number | null;
     lines: number | null;
     code: number | null;
+  };
+
+  type BenchmarkResult = {
+    tally: CountResult;
+    cloc: CountResult;
+    speedup: number | null;
   };
 
   const SDK_URL = "https://unpkg.com/@wasmer/sdk@0.10.0/dist/index.mjs";
@@ -55,7 +63,7 @@
   let running = false;
   let status = "Ready";
   let threads = 1;
-  let result: Result | null = null;
+  let result: BenchmarkResult | null = null;
 
   const decoder = new TextDecoder();
 
@@ -65,6 +73,10 @@
 
   function write(value: string) {
     terminal?.write(value.replaceAll("\n", "\r\n"));
+  }
+
+  function decodeOutput(value: string | Uint8Array) {
+    return typeof value === "string" ? value : decoder.decode(value);
   }
 
   function resetTerminal() {
@@ -193,7 +205,11 @@
     return files;
   }
 
-  async function writeArchive(directory: DirectoryLike, files: ArchiveFile[]) {
+  async function writeArchive(
+    directory: DirectoryLike,
+    perlFileSystem: MemoryFileSystem,
+    files: ArchiveFile[],
+  ) {
     const directories = new Set<string>();
     for (const file of files) {
       const parts = file.path.split("/");
@@ -215,26 +231,48 @@
     for (let index = 0; index < files.length; index += 1) {
       const file = files[index];
       await directory.writeFile(`/${file.path}`, file.contents);
+      perlFileSystem.addFile(`/repo/${file.path}`, file.contents);
       if (index % 250 === 0) {
         status = `Loading ${index.toLocaleString()} / ${files.length.toLocaleString()} files`;
       }
     }
   }
 
-  function parseTotal(output: string): Result {
+  function parseTallyTotal(output: string): Omit<CountResult, "elapsed"> {
     const total = output
       .split(/\r?\n/)
       .find((candidate) => /^Total\s+/i.test(candidate.trim()));
-    if (!total) return { elapsed: 0, files: null, lines: null, code: null };
+    if (!total) return { files: null, lines: null, code: null };
 
     const numbers =
       total.match(/[\d,]+/g)?.map((value) => Number(value.replaceAll(",", ""))) ?? [];
     return {
-      elapsed: 0,
       files: numbers[0] ?? null,
       lines: numbers[1] ?? null,
       code: numbers[4] ?? null,
     };
+  }
+
+  function parseClocTotal(output: string): Omit<CountResult, "elapsed"> {
+    const total = output
+      .split(/\r?\n/)
+      .find((candidate) => /^SUM:\s+/i.test(candidate.trim()));
+    if (!total) return { files: null, lines: null, code: null };
+
+    const numbers =
+      total.match(/[\d,]+/g)?.map((value) => Number(value.replaceAll(",", ""))) ?? [];
+    const files = numbers[0] ?? null;
+    const blank = numbers[1] ?? null;
+    const comment = numbers[2] ?? null;
+    const code = numbers[3] ?? null;
+    const lines =
+      blank === null || comment === null || code === null ? null : blank + comment + code;
+    return { files, lines, code };
+  }
+
+  function formatDuration(milliseconds: number) {
+    if (milliseconds < 1_000) return `${milliseconds.toFixed(1)} ms`;
+    return `${(milliseconds / 1_000).toFixed(2)} s`;
   }
 
   function loadSdk(): Promise<WasmerSdk> {
@@ -263,11 +301,14 @@
       line(`\x1b[38;2;118;124;147mrepository\x1b[0m  ${repository}`);
       line("\x1b[38;2;118;124;147mclone\x1b[0m       downloading the default branch…");
 
-      const [archiveResponse, runtimeResponse, sdk] = await Promise.all([
-        fetch(`/api/tally/repository?repo=${encodeURIComponent(repository)}`),
-        fetch("/api/tally/runtime"),
-        loadSdk(),
-      ]);
+      const [archiveResponse, runtimeResponse, clocResponse, perlResponse, sdk] =
+        await Promise.all([
+          fetch(`/api/tally/repository?repo=${encodeURIComponent(repository)}`),
+          fetch("/api/tally/runtime"),
+          fetch("/api/tally/cloc"),
+          fetch(zeroperlUrl),
+          loadSdk(),
+        ]);
 
       if (!archiveResponse.ok) {
         throw new Error((await archiveResponse.text()) || "Could not download that repository.");
@@ -275,38 +316,93 @@
       if (!runtimeResponse.ok) {
         throw new Error((await runtimeResponse.text()) || "The Tally WASIX binary is unavailable.");
       }
+      if (!clocResponse.ok) {
+        throw new Error((await clocResponse.text()) || "The cloc script is unavailable.");
+      }
+      if (!perlResponse.ok) {
+        throw new Error("The browser Perl runtime is unavailable.");
+      }
 
       const compressed = new Uint8Array(await archiveResponse.arrayBuffer());
+      const tallyBinary = new Uint8Array(await runtimeResponse.arrayBuffer());
+      const clocScript = new Uint8Array(await clocResponse.arrayBuffer());
+      const perlBinary = await perlResponse.arrayBuffer();
+
       status = "Unpacking repository";
       const files = await unpackTarGz(compressed);
       line(`\x1b[38;2;118;124;147mclone\x1b[0m       ${files.length.toLocaleString()} files ready`);
 
       const directory = new sdk.Directory();
-      await writeArchive(directory, files);
+      const perlFileSystem = new MemoryFileSystem({ "/": "" });
+      perlFileSystem.addFile("/cloc", clocScript);
+      await writeArchive(directory, perlFileSystem, files);
 
-      status = "Loading Tally";
-      const binary = new Uint8Array(await runtimeResponse.arrayBuffer());
       line();
       line("\x1b[38;2;93;228;199m$ tally /repo\x1b[0m");
-
-      status = "Counting";
-      const started = performance.now();
-      const instance = await sdk.runWasix(binary, {
+      status = "Running Tally";
+      const tallyStarted = performance.now();
+      const tallyInstance = await sdk.runWasix(tallyBinary, {
         program: "tally",
         args: ["/repo"],
         mount: { "/repo": directory },
       });
-      const output = await instance.wait();
-      const elapsed = performance.now() - started;
+      const tallyOutput = await tallyInstance.wait();
+      const tallyElapsed = performance.now() - tallyStarted;
 
-      if (output.stdout) write(output.stdout);
-      if (output.stderr) write(`\x1b[38;2;208;103;157m${output.stderr}\x1b[0m`);
-      if (!output.ok) throw new Error(`Tally exited with code ${output.code}.`);
-
-      const parsed = parseTotal(output.stdout);
-      result = { ...parsed, elapsed };
+      if (tallyOutput.stdout) write(tallyOutput.stdout);
+      if (tallyOutput.stderr) {
+        write(`\x1b[38;2;208;103;157m${tallyOutput.stderr}\x1b[0m`);
+      }
+      if (!tallyOutput.ok) {
+        throw new Error(`Tally exited with code ${tallyOutput.code}.`);
+      }
       line();
-      line(`\x1b[38;2;118;124;147mfinished in ${elapsed.toFixed(1)} ms\x1b[0m`);
+      line(`\x1b[38;2;118;124;147mfinished in ${formatDuration(tallyElapsed)}\x1b[0m`);
+
+      line();
+      line("\x1b[38;2;199;146;234m$ perl /cloc /repo\x1b[0m");
+      status = "Running cloc";
+      let clocStdout = "";
+      let clocStderr = "";
+      const clocStarted = performance.now();
+      const perl = await ZeroPerl.create({
+        fileSystem: perlFileSystem,
+        fetch: () => Promise.resolve(new Response(perlBinary)),
+        stdout: (value) => {
+          const text = decodeOutput(value);
+          clocStdout += text;
+          write(text);
+        },
+        stderr: (value) => {
+          const text = decodeOutput(value);
+          clocStderr += text;
+          write(`\x1b[38;2;208;103;157m${text}\x1b[0m`);
+        },
+      });
+
+      try {
+        const clocRun = await perl.runFile("/cloc", ["/repo"]);
+        perl.flush();
+        if (!clocRun.success) {
+          throw new Error(clocRun.error || `cloc exited with code ${clocRun.exitCode}.`);
+        }
+      } finally {
+        perl.dispose();
+      }
+      const clocElapsed = performance.now() - clocStarted;
+      if (clocStderr.trim()) {
+        line(`\x1b[38;2;118;124;147mcloc wrote to stderr\x1b[0m`);
+      }
+      line();
+      line(`\x1b[38;2;118;124;147mfinished in ${formatDuration(clocElapsed)}\x1b[0m`);
+
+      const tally = { ...parseTallyTotal(tallyOutput.stdout), elapsed: tallyElapsed };
+      const cloc = { ...parseClocTotal(clocStdout), elapsed: clocElapsed };
+      result = {
+        tally,
+        cloc,
+        speedup: tallyElapsed > 0 ? clocElapsed / tallyElapsed : null,
+      };
       status = "Complete";
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -333,7 +429,7 @@
       convertEol: true,
       cursorBlink: false,
       disableStdin: true,
-      scrollback: 2_000,
+      scrollback: 4_000,
       theme: {
         background: "#17151b",
         foreground: "#d7d3dc",
@@ -362,7 +458,7 @@
     terminal.loadAddon(fitAddon);
     terminal.open(terminalElement);
     terminal.write("\x1b[?25l");
-    line("\x1b[38;2;118;124;147mEnter a public GitHub repository and run Tally in your browser.\x1b[0m");
+    line("\x1b[38;2;118;124;147mEnter a public GitHub repository to race Tally against cloc.\x1b[0m");
 
     resizeObserver = new ResizeObserver(() => fitAddon?.fit());
     resizeObserver.observe(terminalElement);
@@ -411,25 +507,25 @@
     <span>WASIX · {threads} {threads === 1 ? "thread" : "threads"}</span>
   </div>
 
-  <div bind:this={terminalElement} class="h-[24rem] w-full p-4"></div>
+  <div bind:this={terminalElement} class="h-[26rem] w-full p-4"></div>
 
   {#if result}
     <div class="grid grid-cols-2 gap-px border-t border-white/10 bg-white/10 sm:grid-cols-4">
       <div class="bg-mauve-950 px-4 py-3">
-        <div class="font-mono text-xs text-mauve-500">Runtime</div>
-        <div class="mt-1 text-lg font-semibold text-white">{result.elapsed.toFixed(1)} ms</div>
+        <div class="font-mono text-xs text-mauve-500">Tally</div>
+        <div class="mt-1 text-lg font-semibold text-white">{formatDuration(result.tally.elapsed)}</div>
       </div>
       <div class="bg-mauve-950 px-4 py-3">
-        <div class="font-mono text-xs text-mauve-500">Files</div>
-        <div class="mt-1 text-lg font-semibold text-white">{result.files?.toLocaleString() ?? "—"}</div>
+        <div class="font-mono text-xs text-mauve-500">cloc</div>
+        <div class="mt-1 text-lg font-semibold text-white">{formatDuration(result.cloc.elapsed)}</div>
       </div>
       <div class="bg-mauve-950 px-4 py-3">
-        <div class="font-mono text-xs text-mauve-500">Lines</div>
-        <div class="mt-1 text-lg font-semibold text-white">{result.lines?.toLocaleString() ?? "—"}</div>
+        <div class="font-mono text-xs text-mauve-500">Speedup</div>
+        <div class="mt-1 text-lg font-semibold text-old-rose">{result.speedup?.toFixed(1) ?? "—"}×</div>
       </div>
       <div class="bg-mauve-950 px-4 py-3">
         <div class="font-mono text-xs text-mauve-500">Code</div>
-        <div class="mt-1 text-lg font-semibold text-white">{result.code?.toLocaleString() ?? "—"}</div>
+        <div class="mt-1 text-lg font-semibold text-white">{result.tally.code?.toLocaleString() ?? "—"}</div>
       </div>
     </div>
   {/if}
