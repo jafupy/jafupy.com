@@ -25,6 +25,10 @@ const COMPATIBILITY_PATCHES = new Map([
     "use Encode;",
     "# Encode unavailable under ZeroPerl; the PAR::Packer workaround is irrelevant here.",
   ],
+  [
+    "tempdir( CLEANUP => 1 )",
+    "do { my $d = '/repo/.cloc-tmp'; File::Path::mkpath($d) unless -d $d; $d }",
+  ],
 ]);
 
 function patchForZeroPerl(source: string) {
