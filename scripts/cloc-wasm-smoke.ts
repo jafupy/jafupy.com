@@ -31,6 +31,10 @@ fileSystem.addFile(
   "/repo/src/lib.rs",
   "// smoke test\npub fn answer() -> u8 {\n    42\n}\n",
 );
+fileSystem.addFile(
+  "/files.txt",
+  "/repo/src/main.rs\n/repo/src/lib.rs\n",
+);
 
 let stdout = "";
 let stderr = "";
@@ -54,7 +58,7 @@ const perl = await ZeroPerl.create({
 });
 
 try {
-  const result = await perl.runFile("/cloc", ["repo"]);
+  const result = await perl.runFile("/cloc", ["--list-file=/files.txt"]);
   perl.flush();
 
   if (!result.success) {
