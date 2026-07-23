@@ -7,8 +7,12 @@ if (!clocResponse.ok) {
   throw new Error(`Could not fetch cloc: ${clocResponse.status}`);
 }
 
+const clocSource = (await clocResponse.text()).replace(
+  "use Encode qw( encode );",
+  "sub encode { return $_[1]; }",
+);
 const fileSystem = new MemoryFileSystem({ "/": "" });
-fileSystem.addFile("/cloc", new Uint8Array(await clocResponse.arrayBuffer()));
+fileSystem.addFile("/cloc", clocSource);
 fileSystem.addFile(
   "/repo/src/main.rs",
   'fn main() {\n    println!("hello");\n}\n',
