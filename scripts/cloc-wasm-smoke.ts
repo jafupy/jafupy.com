@@ -7,10 +7,12 @@ if (!clocResponse.ok) {
   throw new Error(`Could not fetch cloc: ${clocResponse.status}`);
 }
 
-const clocSource = (await clocResponse.text()).replace(
-  "use Encode qw( encode );",
-  "sub encode { return $_[1]; }",
-);
+const clocSource = (await clocResponse.text())
+  .replace("use Encode qw( encode );", "sub encode { return $_[1]; }")
+  .replace(
+    "use POSIX qw { strftime ceil};",
+    "sub ceil { my $x = shift; my $i = int($x); return $x == $i ? $i : $i + ($x > 0 ? 1 : 0); }\nsub strftime { return ''; }",
+  );
 const fileSystem = new MemoryFileSystem({ "/": "" });
 fileSystem.addFile("/cloc", clocSource);
 fileSystem.addFile(
