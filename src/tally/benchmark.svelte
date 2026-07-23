@@ -13,16 +13,16 @@
   };
 
   type WasmerSdk = {
-    init: () => Promise<void>;
+    init(): Promise<void>;
     Directory: new () => DirectoryLike;
-    runWasix: (
+    runWasix(
       module: Uint8Array,
       options: {
         program: string;
         args: string[];
         mount: Record<string, DirectoryLike>;
       },
-    ) => Promise<{
+    ): Promise<{
       wait(): Promise<{
         ok: boolean;
         code: number;
@@ -53,6 +53,7 @@
   const SDK_URL = "https://unpkg.com/@wasmer/sdk@0.10.0/dist/index.mjs";
   const MAX_FILES = 60_000;
   const MAX_UNPACKED_BYTES = 300 * 1024 * 1024;
+  const decoder = new TextDecoder();
 
   let input = "https://github.com/BurntSushi/ripgrep";
   let terminalElement: HTMLDivElement;
@@ -65,23 +66,21 @@
   let threads = 1;
   let result: BenchmarkResult | null = null;
 
-  const decoder = new TextDecoder();
-
-  function line(value = "") {
+  function terminalLine(value = "") {
     terminal?.writeln(value.replaceAll("\n", "\r\n"));
   }
 
-  function write(value: string) {
+  function terminalWrite(value: string) {
     terminal?.write(value.replaceAll("\n", "\r\n"));
-  }
-
-  function decodeOutput(value: string | Uint8Array) {
-    return typeof value === "string" ? value : decoder.decode(value);
   }
 
   function resetTerminal() {
     terminal?.reset();
     terminal?.write("\x1b[?25l");
+  }
+
+  function decodeOutput(value: string | Uint8Array) {
+    return typeof value === "string" ? value : decoder.decode(value);
   }
 
   function normaliseRepository(value: string) {
@@ -102,10 +101,12 @@
       throw new Error("Only public GitHub repositories are supported.");
     }
 
-    const [owner, rawRepo] = parsed.pathname.split("/").filter(Boolean);
-    const repo = rawRepo?.replace(/\.git$/, "");
-    if (!owner || !repo) throw new Error("That GitHub repository URL is incomplete.");
-    return `${owner}/${repo}`;
+    const [owner, rawRepository] = parsed.pathname.split("/").filter(Boolean);
+    const repository = rawRepository?.replace(/\.git$/, "");
+    if (!owner || !repository) {
+      throw new Error("That GitHub repository URL is incomplete.");
+    }
+    return `${owner}/${repository}`;
   }
 
   function readString(bytes: Uint8Array, start: number, length: number) {
@@ -131,7 +132,9 @@
       if (!Number.isFinite(length) || length <= 0) break;
       const record = text.slice(space + 1, offset + length - 1);
       const equals = record.indexOf("=");
-      if (equals !== -1) values.set(record.slice(0, equals), record.slice(equals + 1));
+      if (equals !== -1) {
+        values.set(record.slice(0, equals), record.slice(equals + 1));
+      }
       offset += length;
     }
 
@@ -150,15 +153,14 @@
       throw new Error("This browser cannot unpack gzip archives.");
     }
 
-    const compressedBuffer = compressed.slice().buffer;
-    const stream = new Blob([compressedBuffer])
+    const stream = new Blob([compressed.slice().buffer])
       .stream()
       .pipeThrough(new DecompressionStream("gzip"));
     const tar = new Uint8Array(await new Response(stream).arrayBuffer());
     const files: ArchiveFile[] = [];
     let totalBytes = 0;
     let offset = 0;
-    let extendedPath: string | null = null;
+    let paxPath: string | null = null;
     let longPath: string | null = null;
 
     while (offset + 512 <= tar.length) {
@@ -172,16 +174,18 @@
       const type = String.fromCharCode(header[156] || 48);
       const dataStart = offset + 512;
       const dataEnd = dataStart + size;
-      if (dataEnd > tar.length) throw new Error("GitHub returned a truncated archive.");
+      if (dataEnd > tar.length) {
+        throw new Error("GitHub returned a truncated archive.");
+      }
       const contents = tar.subarray(dataStart, dataEnd);
 
       if (type === "x") {
-        extendedPath = parsePax(contents).get("path") ?? null;
+        paxPath = parsePax(contents).get("path") ?? null;
       } else if (type === "L") {
         longPath = decoder.decode(contents).replace(/\0+$/, "");
       } else {
-        const archivePath = extendedPath ?? longPath ?? headerPath;
-        extendedPath = null;
+        const archivePath = paxPath ?? longPath ?? headerPath;
+        paxPath = null;
         longPath = null;
 
         if (type === "0" || type === "\0") {
@@ -189,7 +193,9 @@
           if (path) {
             totalBytes += contents.byteLength;
             if (files.length >= MAX_FILES) {
-              throw new Error(`Repository contains more than ${MAX_FILES.toLocaleString()} files.`);
+              throw new Error(
+                `Repository contains more than ${MAX_FILES.toLocaleString()} files.`,
+              );
             }
             if (totalBytes > MAX_UNPACKED_BYTES) {
               throw new Error("Repository expands beyond the 300 MB browser limit.");
@@ -205,9 +211,8 @@
     return files;
   }
 
-  async function writeArchive(
+  async function writeWasmerArchive(
     directory: DirectoryLike,
-    perlFileSystem: MemoryFileSystem,
     files: ArchiveFile[],
   ) {
     const directories = new Set<string>();
@@ -221,27 +226,41 @@
       }
     }
 
-    const orderedDirectories = [...directories].sort(
+    for (const path of [...directories].sort(
       (left, right) => left.split("/").length - right.split("/").length,
-    );
-    for (const path of orderedDirectories) {
+    )) {
       await directory.createDir(path);
     }
 
     for (let index = 0; index < files.length; index += 1) {
       const file = files[index];
       await directory.writeFile(`/${file.path}`, file.contents);
-      perlFileSystem.addFile(`/repo/${file.path}`, file.contents);
       if (index % 250 === 0) {
         status = `Loading ${index.toLocaleString()} / ${files.length.toLocaleString()} files`;
       }
     }
   }
 
+  function createPerlFileSystem(files: ArchiveFile[], clocScript: Uint8Array) {
+    const fileSystem = new MemoryFileSystem({ "/": "" });
+    fileSystem.addFile("/cloc", clocScript);
+    fileSystem.addFile("/cloc-runtime/Regexp/Common/.keep", "");
+    fileSystem.addFile(
+      "/files.txt",
+      `${files.map((file) => `/repo/${file.path}`).join("\n")}\n`,
+    );
+
+    for (const file of files) {
+      fileSystem.addFile(`/repo/${file.path}`, file.contents);
+    }
+
+    return fileSystem;
+  }
+
   function parseTallyTotal(output: string): Omit<CountResult, "elapsed"> {
     const total = output
       .split(/\r?\n/)
-      .find((candidate) => /^Total\s+/i.test(candidate.trim()));
+      .find((line) => /^Total\s+/i.test(line.trim()));
     if (!total) return { files: null, lines: null, code: null };
 
     const numbers =
@@ -256,7 +275,7 @@
   function parseClocTotal(output: string): Omit<CountResult, "elapsed"> {
     const total = output
       .split(/\r?\n/)
-      .find((candidate) => /^SUM:\s+/i.test(candidate.trim()));
+      .find((line) => /^SUM:\s+/i.test(line.trim()));
     if (!total) return { files: null, lines: null, code: null };
 
     const numbers =
@@ -266,16 +285,19 @@
     const comment = numbers[2] ?? null;
     const code = numbers[3] ?? null;
     const lines =
-      blank === null || comment === null || code === null ? null : blank + comment + code;
+      blank === null || comment === null || code === null
+        ? null
+        : blank + comment + code;
     return { files, lines, code };
   }
 
   function formatDuration(milliseconds: number) {
-    if (milliseconds < 1_000) return `${milliseconds.toFixed(1)} ms`;
-    return `${(milliseconds / 1_000).toFixed(2)} s`;
+    return milliseconds < 1_000
+      ? `${milliseconds.toFixed(1)} ms`
+      : `${(milliseconds / 1_000).toFixed(2)} s`;
   }
 
-  function loadSdk(): Promise<WasmerSdk> {
+  function loadSdk() {
     sdkPromise ??= (async () => {
       const sdk = (await import(/* @vite-ignore */ SDK_URL)) as WasmerSdk;
       await sdk.init();
@@ -292,14 +314,17 @@
 
     try {
       const repository = normaliseRepository(input);
-
       if (!window.crossOriginIsolated) {
-        throw new Error("The page is not cross-origin isolated; WASIX threads cannot start.");
+        throw new Error(
+          "The page is not cross-origin isolated; WASIX threads cannot start.",
+        );
       }
 
       status = "Downloading repository";
-      line(`\x1b[38;2;118;124;147mrepository\x1b[0m  ${repository}`);
-      line("\x1b[38;2;118;124;147mclone\x1b[0m       downloading the default branch…");
+      terminalLine(`\x1b[38;2;118;124;147mrepository\x1b[0m  ${repository}`);
+      terminalLine(
+        "\x1b[38;2;118;124;147mclone\x1b[0m       downloading the default branch…",
+      );
 
       const [archiveResponse, runtimeResponse, clocResponse, perlResponse, sdk] =
         await Promise.all([
@@ -311,10 +336,14 @@
         ]);
 
       if (!archiveResponse.ok) {
-        throw new Error((await archiveResponse.text()) || "Could not download that repository.");
+        throw new Error(
+          (await archiveResponse.text()) || "Could not download that repository.",
+        );
       }
       if (!runtimeResponse.ok) {
-        throw new Error((await runtimeResponse.text()) || "The Tally WASIX binary is unavailable.");
+        throw new Error(
+          (await runtimeResponse.text()) || "The Tally WASIX binary is unavailable.",
+        );
       }
       if (!clocResponse.ok) {
         throw new Error((await clocResponse.text()) || "The cloc script is unavailable.");
@@ -330,15 +359,16 @@
 
       status = "Unpacking repository";
       const files = await unpackTarGz(compressed);
-      line(`\x1b[38;2;118;124;147mclone\x1b[0m       ${files.length.toLocaleString()} files ready`);
+      terminalLine(
+        `\x1b[38;2;118;124;147mclone\x1b[0m       ${files.length.toLocaleString()} files ready`,
+      );
 
       const directory = new sdk.Directory();
-      const perlFileSystem = new MemoryFileSystem({ "/": "" });
-      perlFileSystem.addFile("/cloc", clocScript);
-      await writeArchive(directory, perlFileSystem, files);
+      await writeWasmerArchive(directory, files);
+      const perlFileSystem = createPerlFileSystem(files, clocScript);
 
-      line();
-      line("\x1b[38;2;93;228;199m$ tally /repo\x1b[0m");
+      terminalLine();
+      terminalLine("\x1b[38;2;93;228;199m$ tally /repo\x1b[0m");
       status = "Running Tally";
       const tallyStarted = performance.now();
       const tallyInstance = await sdk.runWasix(tallyBinary, {
@@ -349,54 +379,71 @@
       const tallyOutput = await tallyInstance.wait();
       const tallyElapsed = performance.now() - tallyStarted;
 
-      if (tallyOutput.stdout) write(tallyOutput.stdout);
+      if (tallyOutput.stdout) terminalWrite(tallyOutput.stdout);
       if (tallyOutput.stderr) {
-        write(`\x1b[38;2;208;103;157m${tallyOutput.stderr}\x1b[0m`);
+        terminalWrite(`\x1b[38;2;208;103;157m${tallyOutput.stderr}\x1b[0m`);
       }
       if (!tallyOutput.ok) {
         throw new Error(`Tally exited with code ${tallyOutput.code}.`);
       }
-      line();
-      line(`\x1b[38;2;118;124;147mfinished in ${formatDuration(tallyElapsed)}\x1b[0m`);
+      terminalLine();
+      terminalLine(
+        `\x1b[38;2;118;124;147mfinished in ${formatDuration(tallyElapsed)}\x1b[0m`,
+      );
 
-      line();
-      line("\x1b[38;2;199;146;234m$ perl /cloc /repo\x1b[0m");
+      terminalLine();
+      terminalLine(
+        "\x1b[38;2;199;146;234m$ perl /cloc --list-file=/files.txt\x1b[0m",
+      );
       status = "Running cloc";
       let clocStdout = "";
       let clocStderr = "";
       const clocStarted = performance.now();
       const perl = await ZeroPerl.create({
         fileSystem: perlFileSystem,
+        env: {
+          TMPDIR: "/repo",
+          TEMP: "/repo",
+          TMP: "/repo",
+        },
         fetch: () => Promise.resolve(new Response(perlBinary)),
         stdout: (value) => {
           const text = decodeOutput(value);
           clocStdout += text;
-          write(text);
+          terminalWrite(text);
         },
         stderr: (value) => {
           const text = decodeOutput(value);
           clocStderr += text;
-          write(`\x1b[38;2;208;103;157m${text}\x1b[0m`);
+          terminalWrite(`\x1b[38;2;208;103;157m${text}\x1b[0m`);
         },
       });
 
       try {
-        const clocRun = await perl.runFile("/cloc", ["/repo"]);
+        const clocRun = await perl.runFile("/cloc", ["--list-file=/files.txt"]);
         perl.flush();
         if (!clocRun.success) {
-          throw new Error(clocRun.error || `cloc exited with code ${clocRun.exitCode}.`);
+          throw new Error(
+            clocRun.error || `cloc exited with code ${clocRun.exitCode}.`,
+          );
         }
       } finally {
         perl.dispose();
       }
       const clocElapsed = performance.now() - clocStarted;
-      if (clocStderr.trim()) {
-        line(`\x1b[38;2;118;124;147mcloc wrote to stderr\x1b[0m`);
-      }
-      line();
-      line(`\x1b[38;2;118;124;147mfinished in ${formatDuration(clocElapsed)}\x1b[0m`);
 
-      const tally = { ...parseTallyTotal(tallyOutput.stdout), elapsed: tallyElapsed };
+      if (clocStderr.trim()) {
+        terminalLine("\x1b[38;2;118;124;147mcloc wrote to stderr\x1b[0m");
+      }
+      terminalLine();
+      terminalLine(
+        `\x1b[38;2;118;124;147mfinished in ${formatDuration(clocElapsed)}\x1b[0m`,
+      );
+
+      const tally = {
+        ...parseTallyTotal(tallyOutput.stdout),
+        elapsed: tallyElapsed,
+      };
       const cloc = { ...parseClocTotal(clocStdout), elapsed: clocElapsed };
       result = {
         tally,
@@ -407,8 +454,8 @@
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       status = "Failed";
-      line();
-      line(`\x1b[38;2;208;103;157merror: ${message}\x1b[0m`);
+      terminalLine();
+      terminalLine(`\x1b[38;2;208;103;157merror: ${message}\x1b[0m`);
     } finally {
       running = false;
       fitAddon?.fit();
@@ -458,7 +505,9 @@
     terminal.loadAddon(fitAddon);
     terminal.open(terminalElement);
     terminal.write("\x1b[?25l");
-    line("\x1b[38;2;118;124;147mEnter a public GitHub repository to race Tally against cloc.\x1b[0m");
+    terminalLine(
+      "\x1b[38;2;118;124;147mEnter a public GitHub repository to race Tally against cloc.\x1b[0m",
+    );
 
     resizeObserver = new ResizeObserver(() => fitAddon?.fit());
     resizeObserver.observe(terminalElement);
@@ -472,7 +521,9 @@
   });
 </script>
 
-<div class="overflow-hidden rounded-2xl border border-mauve-950/10 bg-mauve-950 shadow-2xl shadow-mauve-950/15 dark:border-mauve-100/10">
+<div
+  class="overflow-hidden rounded-2xl border border-mauve-950/10 bg-mauve-950 shadow-2xl shadow-mauve-950/15 dark:border-mauve-100/10"
+>
   <form
     class="flex flex-col gap-2 border-b border-white/10 p-3 sm:flex-row"
     onsubmit={(event) => {
@@ -510,22 +561,32 @@
   <div bind:this={terminalElement} class="h-[26rem] w-full p-4"></div>
 
   {#if result}
-    <div class="grid grid-cols-2 gap-px border-t border-white/10 bg-white/10 sm:grid-cols-4">
+    <div
+      class="grid grid-cols-2 gap-px border-t border-white/10 bg-white/10 sm:grid-cols-4"
+    >
       <div class="bg-mauve-950 px-4 py-3">
         <div class="font-mono text-xs text-mauve-500">Tally</div>
-        <div class="mt-1 text-lg font-semibold text-white">{formatDuration(result.tally.elapsed)}</div>
+        <div class="mt-1 text-lg font-semibold text-white">
+          {formatDuration(result.tally.elapsed)}
+        </div>
       </div>
       <div class="bg-mauve-950 px-4 py-3">
         <div class="font-mono text-xs text-mauve-500">cloc</div>
-        <div class="mt-1 text-lg font-semibold text-white">{formatDuration(result.cloc.elapsed)}</div>
+        <div class="mt-1 text-lg font-semibold text-white">
+          {formatDuration(result.cloc.elapsed)}
+        </div>
       </div>
       <div class="bg-mauve-950 px-4 py-3">
         <div class="font-mono text-xs text-mauve-500">Speedup</div>
-        <div class="mt-1 text-lg font-semibold text-old-rose">{result.speedup?.toFixed(1) ?? "—"}×</div>
+        <div class="mt-1 text-lg font-semibold text-old-rose">
+          {result.speedup?.toFixed(1) ?? "—"}×
+        </div>
       </div>
       <div class="bg-mauve-950 px-4 py-3">
         <div class="font-mono text-xs text-mauve-500">Code</div>
-        <div class="mt-1 text-lg font-semibold text-white">{result.tally.code?.toLocaleString() ?? "—"}</div>
+        <div class="mt-1 text-lg font-semibold text-white">
+          {result.tally.code?.toLocaleString() ?? "—"}
+        </div>
       </div>
     </div>
   {/if}
