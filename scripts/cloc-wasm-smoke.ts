@@ -54,7 +54,7 @@ const perl = await ZeroPerl.create({
 });
 
 try {
-  const result = await perl.runFile("/cloc", ["/repo"]);
+  const result = await perl.runFile("/cloc", ["repo"]);
   perl.flush();
 
   if (!result.success) {
