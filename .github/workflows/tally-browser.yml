@@ -1,0 +1,23 @@
+name: Tally browser
+
+on:
+  pull_request:
+    paths:
+      - "src/tally/**"
+      - "src/pages/api/tally/**"
+      - "src/pages/tally/**"
+      - "scripts/cloc-wasm-smoke.ts"
+      - "package.json"
+      - "bun.lock"
+      - ".github/workflows/tally-browser.yml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install
+      - run: bun run check
+      - run: bun scripts/cloc-wasm-smoke.ts
+      - run: bun run build
