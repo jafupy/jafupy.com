@@ -2,7 +2,7 @@ import type { APIRoute } from "astro";
 
 const MAX_RUNTIME_BYTES = 32 * 1024 * 1024;
 const RUNTIME_URL =
-  "https://github.com/jafupy/tally/releases/latest/download/tally-wasix.wasm";
+  "https://raw.githubusercontent.com/jafupy/tally/browser-runtime/tally.wasm";
 
 async function readLimited(response: Response, maximum: number) {
   const declared = Number(response.headers.get("content-length"));
@@ -46,7 +46,7 @@ export const GET: APIRoute = async () => {
 
   if (!upstream.ok) {
     return new Response(
-      "The browser runtime has not been published yet. Release Tally with the tally-wasix.wasm asset first.",
+      "The browser runtime has not been published yet. Run the Tally release workflow first.",
       { status: 503 },
     );
   }
