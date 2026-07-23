@@ -18,8 +18,8 @@ const clocSource = (await clocResponse.text())
     "# Encode unavailable under ZeroPerl; PAR::Packer workaround disabled.",
   )
   .replace(
-    "else { Install_Algorithm_Diff(); }",
-    "else { $HAVE_Algorithm_Diff = 0; }",
+    "    Install_Algorithm_Diff();",
+    "    $HAVE_Algorithm_Diff = 0;",
   );
 const fileSystem = new MemoryFileSystem();
 fileSystem.addFile("/cloc", clocSource);
