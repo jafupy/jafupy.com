@@ -22,9 +22,16 @@ const clocSource = (await clocResponse.text())
     "    $HAVE_Algorithm_Diff = 0;",
   )
   .replaceAll("            alarm $max_duration_sec;", "            # alarm unavailable under WASI")
-  .replaceAll("            alarm 0;", "            # alarm unavailable under WASI");
+  .replaceAll("            alarm 0;", "            # alarm unavailable under WASI")
+  .replaceAll(
+    "        $dir = tempdir( CLEANUP => 1 );  # 1 = delete on exit",
+    "        $dir = '/cloc-runtime';",
+  )
+  .replace("    mkdir $Regexp_dir       ;", "    # pre-created by the browser runtime")
+  .replace("    mkdir $Regexp_Common_dir;", "    # pre-created by the browser runtime");
 const fileSystem = new MemoryFileSystem({ "/": "" });
 fileSystem.addFile("/cloc", clocSource);
+fileSystem.addFile("/cloc-runtime/Regexp/Common/.keep", "");
 fileSystem.addFile(
   "/repo/src/main.rs",
   'fn main() {\n    println!("hello");\n}\n',
