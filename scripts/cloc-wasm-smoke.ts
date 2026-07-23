@@ -20,7 +20,9 @@ const clocSource = (await clocResponse.text())
   .replace(
     "    Install_Algorithm_Diff();",
     "    $HAVE_Algorithm_Diff = 0;",
-  );
+  )
+  .replaceAll("            alarm $max_duration_sec;", "            # alarm unavailable under WASI")
+  .replaceAll("            alarm 0;", "            # alarm unavailable under WASI");
 const fileSystem = new MemoryFileSystem({ "/": "" });
 fileSystem.addFile("/cloc", clocSource);
 fileSystem.addFile(
