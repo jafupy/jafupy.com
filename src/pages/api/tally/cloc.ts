@@ -26,8 +26,8 @@ const COMPATIBILITY_PATCHES = new Map([
     "# Encode unavailable under ZeroPerl; the PAR::Packer workaround is irrelevant here.",
   ],
   [
-    "else { Install_Algorithm_Diff(); }",
-    "else { $HAVE_Algorithm_Diff = 0; }",
+    "    Install_Algorithm_Diff();",
+    "    $HAVE_Algorithm_Diff = 0;",
   ],
 ]);
 
