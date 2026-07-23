@@ -2,10 +2,13 @@
 import "@fontsource-variable/bricolage-grotesque";
 import "@fontsource-variable/brygada-1918";
 import "@fontsource-variable/jetbrains-mono";
-import { CopyIcon } from "@lucide/svelte";
+import { ArrowRightIcon, CopyIcon, GithubIcon } from "@lucide/svelte";
 import SeoHead from "$/components/seo-head.astro";
+import Benchmark from "$/tally/benchmark.svelte";
 
 import "$/styles/global.css";
+
+const installCommand = "curl -fsSL https://jafupy.com/tally.sh | sh";
 ---
 
 <!doctype html>
@@ -17,100 +20,187 @@ import "$/styles/global.css";
       content="width=device-width, initial-scale=1.0, viewport-fit=cover"
     />
     <SeoHead
-      title="Tally"
-      description="Tally is a fast, over-optimized line counter for codebases."
+      title="Tally — an eerily fast line counter"
+      description="Count files, lines, blanks, comments, and code with an over-optimised native Rust binary."
     />
   </head>
   <body
-    class="min-w-[320px] min-h-screen bg-mauve-50 dark:bg-mauve-950 text-mauve-800 dark:text-mauve-300 font-sans antialiased"
+    class="min-w-[320px] min-h-screen bg-mauve-50 text-mauve-800 antialiased dark:bg-mauve-950 dark:text-mauve-300"
   >
-    <main
-      class="mx-auto flex min-h-screen w-full max-w-3xl flex-col px-6 py-8 sm:px-8 sm:py-12"
-    >
-      <header class="mb-14 flex items-center justify-between gap-6 text-sm">
-        <a
-          class="text-xl font-semibold text-mauve-950 dark:text-mauve-100 no-underline"
-          href="/tally/">Tally</a
-        >
-        <nav class="flex gap-5 text-mauve-600 dark:text-mauve-400">
-          <a href="#install" class="underline-offset-2">Install</a>
-          <a href="https://github.com/jafupy/tally" class="underline-offset-2">GitHub</a>
-        </nav>
-      </header>
-
-      <section
-        class="max-w-none leading-[1.7] @container"
+    <header class="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-6 sm:px-8 lg:px-10">
+      <a
+        class="text-xl font-semibold tracking-tight text-mauve-950 no-underline dark:text-mauve-100"
+        href="/tally/">Tally</a
       >
-        <h1
-          class="mb-[0.45em] mt-[0.6em] font-serif text-[clamp(1.65rem,1.45rem+0.95vw,1.934rem)] font-semibold leading-[1.15] text-mauve-950 dark:text-mauve-100"
+      <nav class="flex items-center gap-5 text-sm text-mauve-600 dark:text-mauve-400">
+        <a href="#benchmarks" class="hidden underline-offset-4 hover:text-mauve-950 sm:block dark:hover:text-white">Benchmarks</a>
+        <a href="#install" class="underline-offset-4 hover:text-mauve-950 dark:hover:text-white">Install</a>
+        <a
+          href="https://github.com/jafupy/tally"
+          class="inline-flex items-center gap-1.5 underline-offset-4 hover:text-mauve-950 dark:hover:text-white"
         >
-          A line counter for codebases.
-        </h1>
-        <p class="mb-0">
-          Tally counts files, lines, blanks, comments, and code, sorted by language.
-        </p>
+          <GithubIcon class="size-4" aria-hidden="true" />
+          GitHub
+        </a>
+      </nav>
+    </header>
 
-        <pre
-          class="my-5 overflow-x-auto rounded-lg border border-mauve-950/10 dark:border-mauve-100/10 bg-mauve-100 dark:bg-mauve-900 p-4 font-mono leading-[1.7] text-[min(0.875rem,calc((87.5cqw-2rem)/25))]"
-        ><code>$ tally .
-Language Files Lines Blank Comment Code
--------- ----- ----- ----- ------- ----
-Rust         6  1235   184       4 1047
-TOML         9   972   146       2  824
-Text         1   200    73       0  127
--------- ----- ----- ----- ------- ----
-Total       16  2407   403       6 1998</code></pre>
+    <main>
+      <section class="mx-auto grid w-full max-w-7xl items-center gap-12 px-6 pb-20 pt-12 sm:px-8 sm:pt-20 lg:grid-cols-[0.82fr_1.18fr] lg:gap-16 lg:px-10 lg:pb-28 lg:pt-28">
+        <div>
+          <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-old-rose/20 bg-old-rose/8 px-3 py-1 font-mono text-xs text-old-rose dark:bg-old-rose/10">
+            Native Rust · zero runtime
+          </div>
+          <h1 class="max-w-xl font-serif text-[clamp(3.5rem,8vw,7.25rem)] font-semibold leading-[0.88] tracking-[-0.055em] text-mauve-950 dark:text-white">
+            Count code.<br /><span class="text-old-rose">Eerily fast.</span>
+          </h1>
+          <p class="mt-7 max-w-xl text-lg leading-8 text-mauve-650 dark:text-mauve-350">
+            Tally counts files, lines, blanks, comments, and code without making you wait for Perl to wake up.
+          </p>
 
-        <h2
-          id="install"
-          class="mb-[0.45em] mt-[0.8em] font-serif text-[clamp(1.5rem,1.34rem+0.75vw,1.695rem)] font-normal leading-[1.2] text-mauve-950 dark:text-mauve-100"
-        >
-          Install
-        </h2>
-        <div
-          id="install-box"
-          class="my-5 overflow-hidden rounded-lg border border-mauve-300 dark:border-mauve-700 bg-mauve-50 dark:bg-mauve-900 ring-0 ring-blue-400 dark:ring-blue-600 transition-shadow duration-300"
-        >
-          <div
-            class="flex min-h-11 items-center justify-between gap-4 border-b border-mauve-300 dark:border-mauve-700 py-2 pl-4 pr-2 text-sm leading-none text-mauve-600 dark:text-mauve-400"
-          >
-            <span>Shell</span>
+          <div class="mt-8 flex max-w-xl items-center gap-2 rounded-xl border border-mauve-300 bg-white p-2 shadow-sm dark:border-mauve-700 dark:bg-mauve-900">
+            <code class="min-w-0 flex-1 overflow-x-auto px-2 font-mono text-[13px] text-mauve-900 dark:text-mauve-100" data-install-command>{installCommand}</code>
             <button
-              class="inline-flex h-8 min-w-23 cursor-pointer items-center justify-center gap-1.5 rounded-md bg-mauve-100 dark:bg-mauve-800 text-sm font-medium leading-none text-mauve-950 dark:text-mauve-100 hover:bg-mauve-200 dark:hover:bg-mauve-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-old-rose data-[copied=true]:text-old-rose"
+              class="inline-flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-lg bg-mauve-100 text-mauve-950 transition hover:bg-mauve-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-old-rose dark:bg-mauve-800 dark:text-mauve-100 dark:hover:bg-mauve-700"
               type="button"
               data-copy-install
               aria-label="Copy install command"
             >
-              <CopyIcon class="size-4 stroke-2" aria-hidden="true" />
-              <span class="copy-label">Copy</span>
+              <CopyIcon class="size-4" aria-hidden="true" />
             </button>
           </div>
-          <pre
-            class="m-0 overflow-x-auto bg-transparent p-4 font-mono text-sm leading-[1.7] text-mauve-950 dark:text-mauve-100"
-          ><code data-install-command><span class="text-emerald-600 dark:text-emerald-400">curl</span> -fsSL https://jafupy.com/tally.sh | <span class="text-emerald-600 dark:text-emerald-400">sh</span>
-<span class="text-emerald-600 dark:text-emerald-400">tally</span> .</code></pre>
+
+          <div class="mt-8 grid max-w-xl grid-cols-3 gap-5 border-t border-mauve-950/10 pt-6 dark:border-white/10">
+            <div>
+              <div class="text-2xl font-semibold tracking-tight text-mauve-950 dark:text-white">414×</div>
+              <div class="mt-1 text-xs leading-5 text-mauve-500">faster than cloc</div>
+            </div>
+            <div>
+              <div class="text-2xl font-semibold tracking-tight text-mauve-950 dark:text-white">100%</div>
+              <div class="mt-1 text-xs leading-5 text-mauve-500">Rust</div>
+            </div>
+            <div>
+              <div class="text-2xl font-semibold tracking-tight text-mauve-950 dark:text-white">0</div>
+              <div class="mt-1 text-xs leading-5 text-mauve-500">dependencies at runtime</div>
+            </div>
+          </div>
         </div>
 
-        <p class="mb-0">
-          Installs to <code
-            class="rounded-sm bg-mauve-100 dark:bg-mauve-800 px-1 py-0.5 font-mono text-sm"
-            >~/.local/bin</code
-          >.
-        </p>
+        <div class="min-w-0">
+          <Benchmark client:load />
+          <p class="mt-3 px-1 text-xs leading-5 text-mauve-500">
+            Runs the real multi-threaded WASIX build locally in your browser. Public repositories only; source never reaches Tally's server.
+          </p>
+        </div>
       </section>
 
-      <footer class="mt-auto pt-16 text-sm text-mauve-600 dark:text-mauve-400">
-        <p>GPL-3.0-or-later. Counts faster than anyone asked it to.</p>
-      </footer>
+      <section id="benchmarks" class="border-y border-mauve-950/10 bg-mauve-100/60 py-20 dark:border-white/10 dark:bg-mauve-900/35 sm:py-28">
+        <div class="mx-auto w-full max-w-7xl px-6 sm:px-8 lg:px-10">
+          <div class="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
+            <div>
+              <p class="font-mono text-xs uppercase tracking-[0.18em] text-old-rose">Native benchmarks</p>
+              <h2 class="mt-4 max-w-xl font-serif text-4xl font-semibold leading-tight tracking-tight text-mauve-950 dark:text-white sm:text-5xl">
+                Large repository.<br />Small amount of waiting.
+              </h2>
+            </div>
+            <p class="max-w-2xl text-base leading-7 text-mauve-600 dark:text-mauve-400 lg:justify-self-end">
+              Tally walks and parses files in parallel, respects <code class="rounded bg-mauve-200 px-1 py-0.5 font-mono text-sm dark:bg-mauve-800">.gitignore</code> by default, and batches results to keep synchronisation out of the hot path.
+            </p>
+          </div>
+
+          <div class="mt-12 grid gap-4 md:grid-cols-3">
+            <article class="rounded-2xl border border-mauve-950/10 bg-mauve-50 p-6 dark:border-white/10 dark:bg-mauve-950">
+              <div class="flex items-baseline justify-between gap-4">
+                <h3 class="font-semibold text-mauve-950 dark:text-white">Bun</h3>
+                <span class="font-mono text-sm text-mauve-500">~0.14 s</span>
+              </div>
+              <div class="mt-8 font-serif text-6xl font-semibold tracking-tight text-old-rose">414×</div>
+              <p class="mt-2 text-sm text-mauve-500">faster than cloc</p>
+            </article>
+            <article class="rounded-2xl border border-mauve-950/10 bg-mauve-50 p-6 dark:border-white/10 dark:bg-mauve-950">
+              <div class="flex items-baseline justify-between gap-4">
+                <h3 class="font-semibold text-mauve-950 dark:text-white">Linux</h3>
+                <span class="font-mono text-sm text-mauve-500">~1.96 s</span>
+              </div>
+              <div class="mt-8 font-serif text-6xl font-semibold tracking-tight text-old-rose">42×</div>
+              <p class="mt-2 text-sm text-mauve-500">faster than cloc</p>
+            </article>
+            <article class="rounded-2xl border border-mauve-950/10 bg-mauve-50 p-6 dark:border-white/10 dark:bg-mauve-950">
+              <div class="flex items-baseline justify-between gap-4">
+                <h3 class="font-semibold text-mauve-950 dark:text-white">Chromium</h3>
+                <span class="font-mono text-sm text-mauve-500">~20.2 s</span>
+              </div>
+              <div class="mt-8 font-serif text-6xl font-semibold tracking-tight text-old-rose">20×</div>
+              <p class="mt-2 text-sm text-mauve-500">faster than cloc</p>
+            </article>
+          </div>
+          <p class="mt-4 text-xs text-mauve-500">Warm-cache benchmarks on the same machine. Exact results vary by hardware and repository.</p>
+        </div>
+      </section>
+
+      <section class="mx-auto w-full max-w-7xl px-6 py-20 sm:px-8 sm:py-28 lg:px-10">
+        <div class="grid gap-px overflow-hidden rounded-2xl border border-mauve-950/10 bg-mauve-950/10 dark:border-white/10 dark:bg-white/10 md:grid-cols-2 lg:grid-cols-4">
+          <article class="bg-mauve-50 p-7 dark:bg-mauve-950">
+            <div class="font-mono text-xs text-old-rose">01</div>
+            <h3 class="mt-5 text-lg font-semibold text-mauve-950 dark:text-white">Git-aware</h3>
+            <p class="mt-2 text-sm leading-6 text-mauve-600 dark:text-mauve-400">Honours gitignore, global excludes, and parent rules without extra flags.</p>
+          </article>
+          <article class="bg-mauve-50 p-7 dark:bg-mauve-950">
+            <div class="font-mono text-xs text-old-rose">02</div>
+            <h3 class="mt-5 text-lg font-semibold text-mauve-950 dark:text-white">Parallel by default</h3>
+            <p class="mt-2 text-sm leading-6 text-mauve-600 dark:text-mauve-400">Adaptive workers avoid thread overhead on tiny repositories and use it where it matters.</p>
+          </article>
+          <article class="bg-mauve-50 p-7 dark:bg-mauve-950">
+            <div class="font-mono text-xs text-old-rose">03</div>
+            <h3 class="mt-5 text-lg font-semibold text-mauve-950 dark:text-white">Structured output</h3>
+            <p class="mt-2 text-sm leading-6 text-mauve-600 dark:text-mauve-400">Use <code class="font-mono">--json</code> for scripts, agents, dashboards, and questionable shell pipelines.</p>
+          </article>
+          <article class="bg-mauve-50 p-7 dark:bg-mauve-950">
+            <div class="font-mono text-xs text-old-rose">04</div>
+            <h3 class="mt-5 text-lg font-semibold text-mauve-950 dark:text-white">One binary</h3>
+            <p class="mt-2 text-sm leading-6 text-mauve-600 dark:text-mauve-400">No interpreter, package manager, daemon, or pile of runtime sludge.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="install" class="mx-auto w-full max-w-5xl px-6 pb-24 sm:px-8 sm:pb-32">
+        <div class="overflow-hidden rounded-3xl bg-mauve-950 px-6 py-10 text-mauve-200 shadow-2xl shadow-mauve-950/20 sm:px-10 sm:py-14">
+          <div class="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
+            <div>
+              <p class="font-mono text-xs uppercase tracking-[0.18em] text-old-rose">Install</p>
+              <h2 class="mt-4 font-serif text-4xl font-semibold leading-tight tracking-tight text-white sm:text-5xl">One command. Then count everything.</h2>
+              <p class="mt-4 max-w-2xl text-sm leading-6 text-mauve-400">Prebuilt for Apple silicon macOS and x86-64 Linux. Other platforms can build from source.</p>
+            </div>
+            <a
+              href="https://github.com/jafupy/tally"
+              class="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-white/15 px-5 text-sm font-semibold text-white no-underline transition hover:bg-white/10"
+            >
+              View source <ArrowRightIcon class="size-4" aria-hidden="true" />
+            </a>
+          </div>
+
+          <div class="mt-8 flex items-center gap-2 rounded-xl border border-white/10 bg-black/20 p-2">
+            <code class="min-w-0 flex-1 overflow-x-auto px-3 font-mono text-sm text-white" data-install-command>{installCommand}</code>
+            <button
+              class="inline-flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-lg bg-white/10 text-white transition hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-old-rose"
+              type="button"
+              data-copy-install
+              aria-label="Copy install command"
+            >
+              <CopyIcon class="size-4" aria-hidden="true" />
+            </button>
+          </div>
+          <div class="mt-3 font-mono text-xs text-mauve-500">Installs to ~/.local/bin</div>
+        </div>
+      </section>
     </main>
 
-    <script>
-      const button = document.querySelector("[data-copy-install]");
-      const command = document.querySelector("[data-install-command]");
-      const label = button?.querySelector(".copy-label");
-      const installLink = document.querySelector('a[href="#install"]');
-      const installBox = document.querySelector<HTMLElement>("#install-box");
+    <footer class="mx-auto flex w-full max-w-7xl flex-col gap-2 border-t border-mauve-950/10 px-6 py-8 text-xs text-mauve-500 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between sm:px-8 lg:px-10">
+      <p>GPL-3.0-or-later.</p>
+      <p>Counts faster than anyone asked it to.</p>
+    </footer>
 
+    <script>
       const copyText = async (text: string) => {
         if (navigator.clipboard) {
           await navigator.clipboard.writeText(text);
@@ -128,34 +218,19 @@ Total       16  2407   403       6 1998</code></pre>
         textarea.remove();
       };
 
-      button?.addEventListener("click", async () => {
-        await copyText(command?.textContent?.trim() ?? "");
-        if (!label || !(button instanceof HTMLElement)) return;
-
-        label.textContent = "Copied";
-        button.dataset.copied = "true";
-
-        window.setTimeout(() => {
-          label.textContent = "Copy";
-          delete button.dataset.copied;
-        }, 1600);
+      document.querySelectorAll<HTMLElement>("[data-copy-install]").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const container = button.parentElement;
+          const command = container?.querySelector<HTMLElement>("[data-install-command]");
+          await copyText(command?.textContent?.trim() ?? "");
+          button.dataset.copied = "true";
+          button.setAttribute("aria-label", "Copied");
+          window.setTimeout(() => {
+            delete button.dataset.copied;
+            button.setAttribute("aria-label", "Copy install command");
+          }, 1500);
+        });
       });
-
-      const highlightInstallBox = () => {
-        if (!installBox) return;
-        installBox.classList.add("ring-4");
-        window.setTimeout(() => {
-          installBox.classList.remove("ring-4");
-        }, 1200);
-      };
-
-      installLink?.addEventListener("click", () => {
-        window.setTimeout(highlightInstallBox, 400);
-      });
-
-      if (window.location.hash === "#install") {
-        highlightInstallBox();
-      }
     </script>
   </body>
 </html>
