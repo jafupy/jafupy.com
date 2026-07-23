@@ -12,6 +12,10 @@ const clocSource = (await clocResponse.text())
   .replace(
     "use POSIX qw { strftime ceil};",
     "sub ceil { my $x = shift; my $i = int($x); return $x == $i ? $i : $i + ($x > 0 ? 1 : 0); }\nsub strftime { return ''; }",
+  )
+  .replaceAll(
+    "use Encode;",
+    "# Encode unavailable under ZeroPerl; PAR::Packer workaround disabled.",
   );
 const fileSystem = new MemoryFileSystem({ "/": "" });
 fileSystem.addFile("/cloc", clocSource);
