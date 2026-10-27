@@ -82,7 +82,6 @@ const posts = sortPostsByDate(await getCollection("blog")).slice(0, 4);
     --foreground: #242321;
     --secondary: #575650;
     --link: #88505a;
-    --rule: #dedbd5;
   }
 
   * { box-sizing: border-box; }
@@ -122,12 +121,12 @@ const posts = sortPostsByDate(await getCollection("blog")).slice(0, 4);
   ul { padding-left: 1.414rem; }
   li { margin-bottom: .5rem; }
   .posts { padding-left: 0; list-style: none; }
-  .posts li { padding: 0 0 1.414rem; margin-bottom: 1.414rem; border-bottom: 1px solid var(--rule); }
+  .posts li { margin-bottom: 1.414rem; }
   .post-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
   .post-heading a { font-weight: 650; }
   time { color: var(--secondary); white-space: nowrap; }
   .posts p { color: var(--secondary); margin: .25rem 0 0; }
-  footer { border-top: 1px solid var(--rule); padding: 1.414rem 0 3rem; }
+  footer { padding: 0 0 3rem; }
   @media (max-width: 480px) {
     header { align-items: start; gap: 1rem; flex-wrap: wrap; }
     nav { gap: 1rem; }
@@ -141,7 +140,6 @@ const posts = sortPostsByDate(await getCollection("blog")).slice(0, 4);
       --foreground: #eceae5;
       --secondary: #b1afa9;
       --link: #dda8af;
-      --rule: #44413e;
     }
   }
 </style>
