@@ -1,4 +1,8 @@
 ---
+import "@fontsource-variable/bricolage-grotesque";
+import "@fontsource-variable/brygada-1918";
+import "@fontsource-variable/jetbrains-mono";
+
 import SeoHead from "$/components/seo-head.astro";
 import { getPostHref, sortPostsByDate } from "$/lib/blog";
 import { format } from "$/lib/date";
@@ -73,6 +77,9 @@ const posts = sortPostsByDate(await getCollection("blog")).slice(0, 4);
 <style is:global>
   :root {
     color-scheme: light dark;
+    --font-sans: "Bricolage Grotesque Variable", sans-serif;
+    --font-serif: "Brygada 1918 Variable", serif;
+    --font-mono: "JetBrains Mono Variable", monospace;
     /* √2 modular scale: 16 → 22.63 → 32 → 45.25px (at 16px root). */
     --type-0: 1rem;
     --type-1: 1.4142135623730951rem;
@@ -89,22 +96,24 @@ const posts = sortPostsByDate(await getCollection("blog")).slice(0, 4);
     margin: 0;
     background: var(--background);
     color: var(--foreground);
-    font: var(--type-0)/1.6 system-ui, sans-serif;
+    font: var(--type-0)/1.6 var(--font-sans);
   }
   .page { max-width: 68ch; margin: 0 auto; padding: 0 1.25rem; }
   header, nav, footer { display: flex; align-items: baseline; gap: 1.414rem; }
   header { justify-content: space-between; padding: 2rem 0; }
   .home { font-size: var(--type-1); font-weight: 750; letter-spacing: -.03em; }
-  nav, footer { font-size: var(--type-0); }
+  nav, footer { font-family: var(--font-mono); font-size: var(--type-0); }
   h1, h2, p { margin-top: 0; }
   main { padding: 3rem 0 4rem; }
   h1 {
+    font-family: var(--font-serif);
     font-size: var(--type-3);
     line-height: 1.16;
     letter-spacing: -.045em;
     margin-bottom: 1.414rem;
   }
   h2 {
+    font-family: var(--font-serif);
     font-size: var(--type-2);
     line-height: 1.2;
     letter-spacing: -.035em;
@@ -124,7 +133,7 @@ const posts = sortPostsByDate(await getCollection("blog")).slice(0, 4);
   .posts li { margin-bottom: 1.414rem; }
   .post-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
   .post-heading a { font-weight: 650; }
-  time { color: var(--secondary); white-space: nowrap; }
+  time { color: var(--secondary); font-family: var(--font-mono); white-space: nowrap; }
   .posts p { color: var(--secondary); margin: .25rem 0 0; }
   footer { padding: 0 0 3rem; }
   @media (max-width: 480px) {
