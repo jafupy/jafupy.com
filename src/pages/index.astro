@@ -1,81 +1,152 @@
 ---
-import Root from "$/layouts/minimal.astro";
+import "@fontsource-variable/bricolage-grotesque";
+import "@fontsource-variable/brygada-1918";
+
+import SeoHead from "$/components/seo-head.astro";
 import { getPostHref, sortPostsByDate } from "$/lib/blog";
-import Divider from "$/lib/divider.svelte";
-import OverscrollTail from "$/lib/overscroll-tail.astro";
-import { ArrowRightIcon } from "@lucide/svelte";
 import { format } from "$/lib/date";
-import Blurb from "./_blurb.svelte";
+import { projects } from "$/projects";
 import { getCollection } from "astro:content";
 
-const allPosts = sortPostsByDate(await getCollection("blog"));
-const posts = allPosts.slice(0, 4);
-
-const latest = posts[0];
+const posts = sortPostsByDate(await getCollection("blog")).slice(0, 4);
 ---
 
-<Root
-  description="Personal site of Jacob with writing, software projects, experiments, and notes on code, fiction, and building things."
->
-  <div data-page-content class="content-bg @container">
-    <!-- Blurb + Socials -->
-    <div class="px-7 py-6">
-      <Blurb client:load />
-      <div class="flex items-center gap-6 flex-wrap mt-2">
-        <a
-          href="https://github.com/jafupy"
-          class="font-mono text-sm text-old-rose transition-colors hover:underline underline-offset-4"
-        >
-          GitHub
-        </a>
-        <a
-          href="https://x.com/jafupy"
-          class="font-mono text-sm text-old-rose transition-colors hover:underline underline-offset-4"
-        >
-          Twitter
-        </a>
-        <a
-          href="mailto:hello@jafupy.com"
-          class="font-mono text-sm text-old-rose transition-colors hover:underline underline-offset-4"
-        >
-          hello@jafupy.com
-        </a>
-      </div>
-    </div>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <SeoHead description="Jacob's website. Writing, code, and a few terminal games." />
+  </head>
+  <body>
+    <div class="page">
+      <header>
+        <a class="home" href="/">jafu.py</a>
+        <nav aria-label="Main">
+          <a href="/writing">Writing</a>
+          <a href="https://github.com/jafupy">GitHub</a>
+        </nav>
+      </header>
 
-    <!-- Featured — bleeds 1rem past card edges -->
-    <div class="-mx-4 cursor-pointer group">
-      <a
-        href={getPostHref(latest)}
-        class="p-5 flex flex-col border border-mauve-100/20 rounded-xl bg-mauve-800"
-      >
-        <div
-          class="font-mono text-xs tracking-widest uppercase text-mauve-400 mb-3"
-        >
-          latest yappery/tangent/ragebait/"blog post"
-        </div>
-        <h2
-          class="font-serif text-2xl leading-snug mb-3 group-hover:text-white transition-colors"
-        >
-          {latest.data.title}
-        </h2>
-        <p class="text-mauve-400 text-sm leading-relaxed mb-4">
-          {latest.data.description}
+      <main>
+        <h1>I'm Jacob. I do stuff.</h1>
+        <p>
+          I'm Polish, I live in southern England, and I write code.
+          Mostly JavaScript and Rust. I also play guitar and occasionally write things down.
         </p>
-        <div class="w-full flex items-center gap-2.5 pt-1">
-          <span class="font-mono text-xs text-mauve-400 whitespace-nowrap">
-            {format(latest.data.date)}
-          </span>
-          <Divider />
-          <span
-            class="inline-flex items-center gap-2 font-mono text-xs text-mauve-400 transition-colors group-hover:text-mauve-300"
-          >
-            Read
-            <ArrowRightIcon class="size-4" />
-          </span>
-        </div>
-      </a>
+
+        <section aria-labelledby="writing">
+          <h2 id="writing">Writing</h2>
+          <ul class="posts">
+            {posts.map((post) => (
+              <li>
+                <div class="post-heading">
+                  <a href={getPostHref(post)}>{post.data.title}</a>
+                  <time datetime={post.data.date.toISOString().slice(0, 10)}>{format(post.data.date)}</time>
+                </div>
+                <p>{post.data.description.trim()}</p>
+              </li>
+            ))}
+          </ul>
+          <a href="/writing">All writing →</a>
+        </section>
+
+        <section aria-labelledby="games">
+          <h2 id="games">Games</h2>
+          <p>I made a terminal emulator. Naturally, I put games in it.</p>
+          <ul>
+            {projects.map((project) => (
+              <li><a href={project.href}>{project.title}</a></li>
+            ))}
+          </ul>
+        </section>
+      </main>
+
+      <footer>
+        <a href="https://github.com/jafupy">GitHub</a>
+        <span aria-hidden="true">·</span>
+        <a href="https://x.com/jafupy">Twitter</a>
+        <span aria-hidden="true">·</span>
+        <a href="mailto:hello@jafupy.com">Email</a>
+      </footer>
     </div>
-  </div>
-  <OverscrollTail />
-</Root>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    color-scheme: light dark;
+    --font-sans: "Bricolage Grotesque Variable", sans-serif;
+    --font-serif: "Brygada 1918 Variable", serif;
+    /* √2 modular scale: 16 → 22.63 → 32 → 45.25px (at 16px root). */
+    --type-0: 1rem;
+    --type-1: 1.4142135623730951rem;
+    --type-2: 2rem;
+    --type-3: 2.8284271247461903rem;
+    --background: #faf9f6;
+    --foreground: #242321;
+    --secondary: #575650;
+    --link: #88505a;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--background);
+    color: var(--foreground);
+    font: var(--type-0)/1.6 var(--font-sans);
+  }
+  .page { max-width: 68ch; margin: 0 auto; padding: 0 1.25rem; }
+  header, nav, footer { display: flex; align-items: baseline; gap: 1.414rem; }
+  header { justify-content: space-between; padding: 2rem 0; }
+  .home { font-size: var(--type-1); font-weight: 750; letter-spacing: -.03em; }
+  nav, footer, time { font-family: "Bricolage Grotesque Variable", sans-serif; font-size: var(--type-0); }
+  h1, h2, p { margin-top: 0; }
+  main { padding: 3rem 0 4rem; }
+  h1 {
+    font-family: var(--font-serif);
+    font-size: var(--type-3);
+    line-height: 1.16;
+    letter-spacing: -.045em;
+    margin-bottom: 1.414rem;
+  }
+  h2 {
+    font-family: var(--font-serif);
+    font-size: var(--type-2);
+    line-height: 1.2;
+    letter-spacing: -.035em;
+    margin-bottom: 1.414rem;
+  }
+  main > p { max-width: 55ch; }
+  section { margin-top: 4rem; }
+  p { margin-bottom: 1rem; }
+  a { color: var(--link); text-underline-offset: .2em; }
+  a:hover { text-decoration-thickness: 2px; }
+  a:focus-visible { outline: 2px solid currentColor; outline-offset: 4px; }
+  header a { color: inherit; }
+  .home { text-decoration: none; }
+  ul { padding-left: 1.414rem; }
+  li { margin-bottom: .5rem; }
+  .posts { padding-left: 0; list-style: none; }
+  .posts li { margin-bottom: 1.414rem; }
+  .post-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+  .post-heading a { font-weight: 650; }
+  time { color: var(--secondary); white-space: nowrap; }
+  .posts p { color: var(--secondary); margin: .25rem 0 0; }
+  footer { padding: 0 0 3rem; }
+  @media (max-width: 480px) {
+    header { align-items: start; gap: 1rem; flex-wrap: wrap; }
+    nav { gap: 1rem; }
+    main { padding-top: 2rem; }
+    .post-heading { display: block; }
+    time { display: block; }
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --background: #181818;
+      --foreground: #eceae5;
+      --secondary: #b1afa9;
+      --link: #dda8af;
+    }
+  }
+</style>
